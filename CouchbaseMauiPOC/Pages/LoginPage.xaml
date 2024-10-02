@@ -6,7 +6,6 @@
              x:DataType="viewModels:LoginViewModel">
         <ContentPage.Content>
              <StackLayout Margin="10,100,10,0" Spacing="20">
-                <Image Source="icon.png" HorizontalOptions="Center" />
                 <StackLayout Spacing="10">
                     <Entry x:Name="userNameEntry" Text="{Binding Username}" Placeholder="Username" Keyboard="Email" />
                     <Entry Text="{Binding Password}" IsPassword="True" Placeholder="Password"/>
