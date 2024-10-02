@@ -27,10 +27,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IMediaService, MediaService>();
 		builder.Services.AddSingleton<IUserProfileRepository, UserProfileRepository>();
 
-		if(DeviceInfo.Current.Platform == DevicePlatform.Android)
-		{
-			Couchbase.Lite.Support.Droid.Activate(Platform.AppContext);
-		}
+#if ANDROID
+		Couchbase.Lite.Support.Android.Activate(Platform.AppContext);
+#endif
 
 		return builder.Build();
 	}

@@ -22,6 +22,7 @@ public sealed class UserProfileRepository : BaseRepository<UserProfile, string>,
                 {
                     Directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppInstance.User.Username)
                 };
+                Trace.WriteLine($"****************************    DB PATH: {databaseConfig.Directory}");
             }
 
             return databaseConfig;

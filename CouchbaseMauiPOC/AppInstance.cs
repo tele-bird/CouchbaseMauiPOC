@@ -1,6 +1,4 @@
-using System;
 using CouchbaseMauiPOC.Models;
-using Org.Apache.Http.Authentication;
 
 namespace CouchbaseMauiPOC;
 
