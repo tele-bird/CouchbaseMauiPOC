@@ -1,12 +1,13 @@
 using Couchbase.Lite;
 using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.Repositories;
 
 public sealed class UserProfileRepository : BaseRepository, IUserProfileRepository
 {
-    public UserProfileRepository(IServiceProvider serviceProvider)
-        : base(serviceProvider, "userprofile")
+    public UserProfileRepository(IDatabaseSeedService databaseSeedService)
+        : base(databaseSeedService, "userprofile")
         {
         }
 

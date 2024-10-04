@@ -1,11 +1,12 @@
 using System.Diagnostics;
 using Couchbase.Lite;
+using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.Repositories;
 
 public abstract class BaseRepository : IBaseRepository
 {
-    private readonly IServiceProvider serviceProvider;
+    private readonly IDatabaseSeedService databaseSeedService;
     private readonly string databaseName;
     private Database? database;
     private ListenerToken? databaseChangeListenerToken;
@@ -13,21 +14,25 @@ public abstract class BaseRepository : IBaseRepository
 
     public string? Path => database!.Path;
 
-    protected BaseRepository(IServiceProvider serviceProvider, string databaseName)
+    protected BaseRepository(IDatabaseSeedService databaseSeedService, string databaseName)
     {
-        this.serviceProvider = serviceProvider;
+        this.databaseSeedService = databaseSeedService;
         this.databaseName = databaseName;
     }
 
     protected virtual async Task<Database> GetDatabaseAsync()
     {
+        Trace.WriteLine($"{GetType().Name}.{nameof(GetDatabaseAsync)} >>");
         if(database == null)
         {
-            DatabaseManager databaseManager = new DatabaseManager(serviceProvider, databaseName);
+            Trace.WriteLine($"{GetType().Name}.{nameof(GetDatabaseAsync)} - CREATING {databaseName} DATABASE");
+            DatabaseManager databaseManager = new DatabaseManager(databaseSeedService, databaseName);
             database = await databaseManager.GetDatabaseAsync();
             databaseChangeListenerToken = database.GetDefaultCollection().AddChangeListener(TraceDatabaseChange);
+            Trace.WriteLine($"{GetType().Name}.{nameof(GetDatabaseAsync)} - DATABASE {databaseName} CREATED");
         }
 
+        Trace.WriteLine($"{GetType().Name}.{nameof(GetDatabaseAsync)} <<");
         return database;
     }
 
@@ -40,7 +45,7 @@ public abstract class BaseRepository : IBaseRepository
     public virtual void Dispose()
     {
         Trace.WriteLine($"{GetType().Name}.{nameof(Dispose)} >>");
-        
+
         if(database != null)
         {
             Trace.WriteLine($"{GetType().Name}.{nameof(Dispose)} DISPOSING");

@@ -1,12 +1,13 @@
 using Couchbase.Lite.Query;
 using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.Repositories;
 
 public class UniversityRepository : BaseRepository, IUniversityRepository
 {
-    public UniversityRepository(IServiceProvider serviceProvider)
-        : base(serviceProvider, "universities")
+    public UniversityRepository(IDatabaseSeedService databaseSeedService)
+        : base(databaseSeedService, "universities")
         {
         }
 

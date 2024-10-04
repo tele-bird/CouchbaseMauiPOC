@@ -7,14 +7,14 @@ namespace CouchbaseMauiPOC.Repositories;
 
 internal class DatabaseManager
 {
-    private readonly IServiceProvider serviceProvider;
+    private readonly IDatabaseSeedService databaseSeedService;
     private readonly string databaseName;
 
     Database? database;
 
-    internal DatabaseManager(IServiceProvider serviceProvider, string databaseName)
+    internal DatabaseManager(IDatabaseSeedService databaseSeedService, string databaseName)
     {
-        this.serviceProvider = serviceProvider;
+        this.databaseSeedService = databaseSeedService;
         this.databaseName = databaseName;
     }
 
@@ -45,13 +45,9 @@ internal class DatabaseManager
                 options.Directory = defaultDirectory;
                 if(!Database.Exists(databaseName, defaultDirectory))
                 {
-                    var DatabaseSeedService = serviceProvider.GetRequiredService<IDatabaseSeedService>();
-                    if(DatabaseSeedService != null)
-                    {
-                        await DatabaseSeedService.CopyDatabaseAsync(defaultDirectory);
-                        database = new Database(databaseName, options);
-                        CreateUniversitiesDatabaseIndex();
-                    }
+                    await databaseSeedService.CopyDatabaseAsync(defaultDirectory);
+                    database = new Database(databaseName, options);
+                    CreateUniversitiesDatabaseIndex();
                 }
                 else
                 {
