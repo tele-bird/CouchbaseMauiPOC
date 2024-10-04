@@ -1,20 +1,13 @@
-using CouchbaseMauiPOC.Repositories;
-using CouchbaseMauiPOC.Services;
 using CouchbaseMauiPOC.ViewModels;
 
 namespace CouchbaseMauiPOC.Pages;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class UserProfilePage : ContentPage
+public partial class UserProfilePage : BaseContentPage<UserProfileViewModel>
 {
-	public UserProfilePage(IServiceProvider serviceProvider, Action logoutSuccessful)
+	public UserProfilePage(UserProfileViewModel userProfileViewModel)
+		: base(userProfileViewModel)
 	{
 		InitializeComponent();
-
-		var userProfileRepository = serviceProvider.GetRequiredService<IUserProfileRepository>();
-		var alertService = serviceProvider.GetRequiredService<IAlertService>();
-		var mediaService = serviceProvider.GetRequiredService<IMediaService>();
-
-		BindingContext = new UserProfileViewModel(userProfileRepository, alertService, mediaService, logoutSuccessful);
 	}
 }

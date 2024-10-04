@@ -1,24 +1,16 @@
 ﻿using CouchbaseMauiPOC.Pages;
+using CouchbaseMauiPOC.Services;
+using CouchbaseMauiPOC.ViewModels;
 
 namespace CouchbaseMauiPOC;
 
 public partial class App : Application
 {
-    private readonly IServiceProvider serviceProvider;
-
     public App(IServiceProvider serviceProvider)
 	{
 		InitializeComponent();
 
-		MainPage = new LoginPage(OnSignInSuccessful);
-        this.serviceProvider = serviceProvider;
+		var loginPage = serviceProvider.GetRequiredService<LoginPage>();
+		MainPage = new NavigationPage(loginPage);
     }
-
-	void OnSignInSuccessful()
-	{
-		var navPage = new NavigationPage(new UserProfilePage(serviceProvider, OnLogoutSuccessful));
-		MainPage = navPage;
-	}
-
-	void OnLogoutSuccessful() => MainPage = new LoginPage(OnSignInSuccessful);
 }

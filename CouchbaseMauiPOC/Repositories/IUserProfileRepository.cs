@@ -2,8 +2,8 @@ using CouchbaseMauiPOC.Models;
 
 namespace CouchbaseMauiPOC.Repositories;
 
-public interface IUserProfileRepository : IRepository<UserProfile, string>
+public interface IUserProfileRepository : IBaseRepository
 {
-    new UserProfile? Get(string userProfileId);
-    new bool Save(UserProfile userProfile);
+    Task<UserProfile?> GetAsync(string userProfileId);
+    Task<bool> SaveAsync(UserProfile userProfile);
 }

@@ -3,68 +3,52 @@ using Couchbase.Lite;
 
 namespace CouchbaseMauiPOC.Repositories;
 
-public abstract class BaseRepository<T, K> : IRepository<T, K> where T : class
+public abstract class BaseRepository : IBaseRepository
 {
-    string DatabaseName {get; set;}
-    ListenerToken DatabaseListenerToken {get; set;}
+    private readonly IServiceProvider serviceProvider;
+    private readonly string databaseName;
+    private Database? database;
+    private ListenerToken? databaseChangeListenerToken;
 
-    protected virtual DatabaseConfiguration? DatabaseConfig {get; set;}
 
-    Database? database;
-    protected Database Database
+    public string? Path => database!.Path;
+
+    protected BaseRepository(IServiceProvider serviceProvider, string databaseName)
     {
-        get
-        {
-            if(database == null)
-            {
-                database = new Database(DatabaseName, DatabaseConfig);
-            }
-            return database;
-        }
-        private set => database = value;
+        this.serviceProvider = serviceProvider;
+        this.databaseName = databaseName;
     }
 
-    protected BaseRepository(string databaseName)
+    protected virtual async Task<Database> GetDatabaseAsync()
     {
-        if(string.IsNullOrEmpty(databaseName))
+        if(database == null)
         {
-            throw new ArgumentOutOfRangeException("databaseName cannot be null or empty");
+            DatabaseManager databaseManager = new DatabaseManager(serviceProvider, databaseName);
+            database = await databaseManager.GetDatabaseAsync();
+            databaseChangeListenerToken = database.GetDefaultCollection().AddChangeListener(TraceDatabaseChange);
         }
 
-        DatabaseName = databaseName;
-
-        DatabaseListenerToken = Database.GetDefaultCollection().AddChangeListener(OnDatabaseChangeEvent);
+        return database;
     }
 
-    private void OnDatabaseChangeEvent(object? sender, CollectionChangedEventArgs e)
+    private void TraceDatabaseChange(object? sender, CollectionChangedEventArgs e)
     {
-        foreach(var documentId in e.DocumentIDs)
+        var documentIdsList = string.Join(", ", e.DocumentIDs);
+        Trace.WriteLine($"Database {e.Database.Path} changed {e.Collection.Count} items: [{documentIdsList}]");
+    }
+
+    public virtual void Dispose()
+    {
+        if(database != null)
         {
-            var document = Database.GetDefaultCollection().GetDocument(documentId);
-            string message = $"Document (id={documentId}) was ";
-
-            if(document == null)
+            if(databaseChangeListenerToken.HasValue)
             {
-                message += "deleted";
+                database.GetDefaultCollection().RemoveChangeListener(databaseChangeListenerToken.Value);
+                databaseChangeListenerToken = null;
             }
-            else
-            {
-                message += "added/updated";
-            }
-
-            Trace.WriteLine(message);
+            
+            database.Close();
+            database = null;
         }
     }
-
-    public void Dispose()
-    {
-        DatabaseConfig = null;
-        Database.GetDefaultCollection().RemoveChangeListener(DatabaseListenerToken);
-        Database.Close();
-        database = null;
-    }
-
-    public abstract T? Get(K id);
-
-    public abstract bool Save(T obj);
 }

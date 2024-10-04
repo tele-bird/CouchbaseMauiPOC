@@ -58,10 +58,17 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="Couchbase.Lite" Version="3.2.0" />
+		<PackageReference Include="Couchbase.Lite.Enterprise" Version="3.2.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Platforms/Android/Assets/" />
+	</ItemGroup>
+	<ItemGroup>
+		<AndroidAsset Include="Platforms\Android\Assets\universities.zip"/>
 	</ItemGroup>
 
 </Project>

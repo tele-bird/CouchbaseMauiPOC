@@ -1,21 +1,19 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.ViewModels;
 
-public partial class LoginViewModel : BaseViewModel
+public partial class LoginViewModel : BaseNavigationViewModel
 {
     [ObservableProperty]
     string? username;
     [ObservableProperty]
     string? password;
 
-    private Action? signInSuccessful;
-
-    public LoginViewModel(Action signInSuccessful)
+    public LoginViewModel(INavigationService navigationService)
+        : base(navigationService)
     {
-        this.signInSuccessful = signInSuccessful;
     }
 
     [RelayCommand]
@@ -29,8 +27,7 @@ public partial class LoginViewModel : BaseViewModel
                 Password = Password
             };
 
-            signInSuccessful?.Invoke();
-            signInSuccessful = null;
+            navigationService.PushAsync<UserProfileViewModel>(true);
         }
     }
 }

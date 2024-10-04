@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:CouchbaseMauiPOC.Pages"
+             xmlns:controls="clr-namespace:CouchbaseMauiPOC.Controls"
+             xmlns:viewModels="clr-namespace:CouchbaseMauiPOC.ViewModels"
+             x:Class="CouchbaseMauiPOC.Pages.UniversitiesPage"
+             x:DataType="viewModels:UniversitiesViewModel"
+             x:TypeArguments="viewModels:UniversitiesViewModel">
+             <pages:BaseContentPage.Content>
+                <StackLayout>
+                    <SearchBar AutomationId="sbName" Placeholder="Name" Text="{Binding Name}" />
+                    <SearchBar AutomationId="sbCountry" Placeholder="Country (optional)" Text="{Binding Country}" />
+                    <Button AutomationId="btnLookup" Text="Lookup" Command="{Binding SearchCommand}" IsEnabled="{Binding IsSearchEnabled}"
+                        WidthRequest="150" BackgroundColor="Red" TextColor="White" FontAttributes="Bold"
+                        HorizontalOptions="CenterAndExpand" Margin="10" />
+                    <BoxView BackgroundColor="Gray" HeightRequest="1" HorizontalOptions="FillAndExpand" />
+                    <controls:ListView AutomationId="lvItems"
+                        ItemsSource="{Binding Universities}"
+                        ItemTappedCommand="{Binding SelectUniversityCommand}"
+                        SeparatorVisibility="None"
+                        HasUnevenRows="true">
+                        <controls:ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <StackLayout Margin="0">
+                                        <StackLayout Margin="10">
+                                            <Label Text="{Binding Name}" />
+                                            <Label Text="{Binding Country}" FontSize="Small" />
+                                        </StackLayout>
+                                        <BoxView BackgroundColor="Gray" HeightRequest="1" HorizontalOptions="FillAndExpand" />
+                                    </StackLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </controls:ListView.ItemTemplate>
+                    </controls:ListView>
+                </StackLayout>
+            </pages:BaseContentPage.Content>
+</pages:BaseContentPage>

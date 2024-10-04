@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using CouchbaseMauiPOC.Extensions;
 using CouchbaseMauiPOC.Repositories;
 using CouchbaseMauiPOC.Services;
 using Microsoft.Extensions.Logging;
@@ -25,10 +26,13 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<IAlertService, AlertService>();
 		builder.Services.AddSingleton<IMediaService, MediaService>();
+		builder.Services.AddSingleton<IDatabaseSeedService, DatabaseSeedService>();
 		builder.Services.AddSingleton<IUserProfileRepository, UserProfileRepository>();
+		builder.Services.AddSingleton<IUniversityRepository, UniversityRepository>();
+		builder.Services.AddNavigation();
 
 #if ANDROID
-		Couchbase.Lite.Support.Android.Activate(Platform.AppContext);
+		Couchbase.Lite.Support.Droid.Activate(Platform.AppContext);
 #endif
 
 		return builder.Build();

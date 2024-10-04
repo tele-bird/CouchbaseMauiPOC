@@ -3,12 +3,12 @@ using CouchbaseMauiPOC.ViewModels;
 namespace CouchbaseMauiPOC.Pages;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class LoginPage : ContentPage
+public partial class LoginPage : BaseContentPage<LoginViewModel>
 {
-	public LoginPage(Action signInSuccessful)
+	public LoginPage(LoginViewModel loginViewModel)
+		: base(loginViewModel)
 	{
 		InitializeComponent();
-		BindingContext = new LoginViewModel(signInSuccessful);
 	}
 
     protected override void OnAppearing()

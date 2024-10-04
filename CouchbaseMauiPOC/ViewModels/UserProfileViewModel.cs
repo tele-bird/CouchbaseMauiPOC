@@ -6,12 +6,11 @@ using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.ViewModels;
 
-public partial class UserProfileViewModel : BaseViewModel
+public partial class UserProfileViewModel : BaseNavigationViewModel
 {
     private readonly IUserProfileRepository userProfileRepository;
     private readonly IAlertService alertService;
     private readonly IMediaService mediaService;
-    private Action? logoutSuccessful;
 
     [ObservableProperty]
     string? name;
@@ -21,55 +20,57 @@ public partial class UserProfileViewModel : BaseViewModel
     string? address;
     [ObservableProperty]
     byte[]? imageData;
+    [ObservableProperty]
+    string? university;
 
-    string UserProfileDocId => $"user::{AppInstance.User!.Username}";
+    string UserProfileDocId => AppInstance.User != null ? $"user::{AppInstance.User!.Username}" : "user::";
 
     public UserProfileViewModel(
+        INavigationService navigationService,
         IUserProfileRepository userProfileRepository, 
         IAlertService alertService, 
-        IMediaService mediaService, 
-        Action logoutSuccessful)
+        IMediaService mediaService)
+        : base(navigationService)
     {
         this.userProfileRepository = userProfileRepository;
         this.alertService = alertService;
         this.mediaService = mediaService;
-        this.logoutSuccessful = logoutSuccessful;
-
-        LoadUserProfile();
     }
 
-    private async void LoadUserProfile()
+    public override async Task LoadAsync(bool refresh)
+    {
+        await LoadUserProfile();
+    }
+
+    private async Task LoadUserProfile()
     {
         IsBusy = true;
 
-        var userProfile = await Task.Run(() =>
+        if(string.IsNullOrEmpty(Email))
         {
-            var up = userProfileRepository.Get(UserProfileDocId);
-            if(up == null)
+            var userProfile = await userProfileRepository.GetAsync(UserProfileDocId);
+
+            if(userProfile == null)
             {
-                up = new UserProfile
+                userProfile = new UserProfile
                 {
                     Id = UserProfileDocId,
                     Email = AppInstance.User!.Username
                 };
             }
 
-            return up;
-        });
-
-        if(userProfile != null)
-        {
             Name = userProfile.Name;
             Email = userProfile.Email;
             Address = userProfile.Address;
             ImageData = userProfile.ImageData;
+            University = userProfile.University;
         }
 
         IsBusy = false;
     }
 
     [RelayCommand]
-    Task Save()
+    async Task Save()
     {
         var userProfile = new UserProfile
         {
@@ -77,17 +78,20 @@ public partial class UserProfileViewModel : BaseViewModel
             Name = Name,
             Email = Email,
             Address = Address,
-            ImageData = ImageData
+            ImageData = ImageData,
+            University = University
         };
 
-        bool? success = userProfileRepository.Save(userProfile);
+        bool success = await userProfileRepository.SaveAsync(userProfile).ConfigureAwait(false);
 
-        if(success.HasValue && success.Value)
+        if(success)
         {
-            return alertService.ShowMessage(string.Empty, "Successfully updated profile", "OK");
+            await alertService.ShowMessage(string.Empty, $"Successfully updated profile to {userProfileRepository.Path}", "OK");
         }
-
-        return alertService.ShowMessage(string.Empty, "Error updating profile", "OK");
+        else
+        {
+            await alertService.ShowMessage(string.Empty, $"Error updating profile to {userProfileRepository.Path}", "OK");
+        }
     }
 
     [RelayCommand]
@@ -106,7 +110,20 @@ public partial class UserProfileViewModel : BaseViewModel
     {
         userProfileRepository.Dispose();
         AppInstance.User = null;
-        logoutSuccessful?.Invoke();
-        logoutSuccessful = null;
+        navigationService.PopAsync(false);
+    }
+
+    [RelayCommand]
+    Task SelectUniversity()
+    {
+        return navigationService.PushAsync<UniversitiesViewModel>(true, InitializeUniversitiesViewModel);
+    }
+
+    private void InitializeUniversitiesViewModel(UniversitiesViewModel universitiesViewModel)
+    {
+        universitiesViewModel.UniversitySelected = (name) =>
+        {
+            University = name;
+        };
     }
 }
