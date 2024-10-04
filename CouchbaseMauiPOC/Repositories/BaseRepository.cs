@@ -39,16 +39,21 @@ public abstract class BaseRepository : IBaseRepository
 
     public virtual void Dispose()
     {
+        Trace.WriteLine($"{GetType().Name}.{nameof(Dispose)} >>");
+        
         if(database != null)
         {
+            Trace.WriteLine($"{GetType().Name}.{nameof(Dispose)} DISPOSING");
             if(databaseChangeListenerToken.HasValue)
             {
                 database.GetDefaultCollection().RemoveChangeListener(databaseChangeListenerToken.Value);
                 databaseChangeListenerToken = null;
             }
-            
+
             database.Close();
             database = null;
         }
+
+        Trace.WriteLine($"{GetType().Name}.{nameof(Dispose)} <<");
     }
 }

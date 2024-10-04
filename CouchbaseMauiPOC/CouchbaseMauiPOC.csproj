@@ -66,9 +66,18 @@
 
 	<ItemGroup>
 	  <Folder Include="Platforms/Android/Assets/" />
+	  <Folder Include="Platforms/iOS/universities.cblite2/" />
 	</ItemGroup>
 	<ItemGroup>
-		<AndroidAsset Include="Platforms\Android\Assets\universities.zip"/>
+		<AndroidAsset Include="Platforms\Android\Assets\universities.zip" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="Platforms\iOS\universities.cblite2\db.sqlite3">
+		</Content>
+		<Content Include="Platforms\iOS\universities.cblite2\db.sqlite3-shm">
+		</Content>
+		<Content Include="Platforms\iOS\universities.cblite2\db.sqlite3-wal">
+		</Content>
 	</ItemGroup>
 
 </Project>

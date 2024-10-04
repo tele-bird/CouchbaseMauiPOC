@@ -10,6 +10,7 @@ namespace CouchbaseMauiPOC.ViewModels;
 public partial class UniversitiesViewModel : BaseNavigationViewModel
 {
     private readonly IUniversityRepository universityRepository;
+    private readonly IAlertService alertService;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSearchEnabled))]
@@ -25,10 +26,11 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
 
     public Action<string>? UniversitySelected {get; set;}
 
-    public UniversitiesViewModel(INavigationService navigationService, IUniversityRepository universityRepository)
+    public UniversitiesViewModel(INavigationService navigationService, IUniversityRepository universityRepository, IAlertService alertService)
      : base(navigationService)
      {
         this.universityRepository = universityRepository;
+        this.alertService = alertService;
     }
 
     [RelayCommand]
@@ -43,7 +45,14 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     {
         if(!string.IsNullOrEmpty(Name))
         {
-            Universities = await universityRepository.SearchByName(Name, Country);
+            try
+            {
+                Universities = await universityRepository.SearchByName(Name, Country);
+            }
+            catch(Exception exc)
+            {
+                await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+            }
         }
     }
 }

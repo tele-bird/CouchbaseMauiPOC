@@ -7,7 +7,8 @@
              x:Class="CouchbaseMauiPOC.Pages.UserProfilePage"
              x:DataType="viewModels:UserProfileViewModel"
              x:TypeArguments="viewModels:UserProfileViewModel"
-             Title="Your Profile">
+             Title="Your Profile"
+             NavigationPage.HasBackButton="False">
         <ContentPage.Resources>
             <ResourceDictionary>
                 <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
