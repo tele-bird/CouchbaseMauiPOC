@@ -46,27 +46,40 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
     {
         IsBusy = true;
 
-        if(string.IsNullOrEmpty(Email))
+        var userprofile = await userProfileRepository.GetLocalAsync(UserProfileDocId);
+        if(userprofile == null)
         {
-            var userProfile = await userProfileRepository.GetAsync(UserProfileDocId);
-
-            if(userProfile == null)
+            userprofile = new UserProfile
             {
-                userProfile = new UserProfile
-                {
-                    Id = UserProfileDocId,
-                    Email = AppInstance.User!.Username
-                };
-            }
-
-            Name = userProfile.Name;
-            Email = userProfile.Email;
-            Address = userProfile.Address;
-            ImageData = userProfile.ImageData;
-            University = userProfile.University;
+                Id = UserProfileDocId,
+                Email = AppInstance.User!.Username
+            };
         }
 
+        Name = userprofile.Name;
+        Email = userprofile.Email;
+        Address = userprofile.Address;
+        ImageData = userprofile.ImageData;
+        University = userprofile.University;
+
+        await userProfileRepository.StartReplicationForCurrentUser().ConfigureAwait(false);
+
+        userProfileRepository.UserProfileChanged += UpdateUserProfile;
+        await userProfileRepository.GetAsync(UserProfileDocId);
+
         IsBusy = false;
+    }
+
+    private void UpdateUserProfile(UserProfileChangedEventArgs args)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Name = args.UserProfile.Name;
+            Email = args.UserProfile.Email;
+            Address = args.UserProfile.Address;
+            ImageData = args.UserProfile.ImageData;
+            University = args.UserProfile.University;
+        });
     }
 
     [RelayCommand]
@@ -123,7 +136,10 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
     {
         universitiesViewModel.UniversitySelected = (name) =>
         {
-            University = name;
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                University = name;
+            });
         };
     }
 }

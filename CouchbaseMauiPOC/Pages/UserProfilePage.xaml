@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <pages:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:CouchbaseMauiPOC.Converters"
              xmlns:pages="clr-namespace:CouchbaseMauiPOC.Pages"
              xmlns:viewModels="clr-namespace:CouchbaseMauiPOC.ViewModels"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -11,7 +12,7 @@
              NavigationPage.HasBackButton="False">
         <ContentPage.Resources>
             <ResourceDictionary>
-                <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+                <converters:ByteToImageSourceConverter x:Key="byteArrayToImageSourceConverter"/>
             </ResourceDictionary>
         </ContentPage.Resources>
         <ContentPage.ToolbarItems>
@@ -33,7 +34,7 @@
                 </Grid.RowDefinitions>
 
                 <StackLayout Grid.Row="0" Grid.ColumnSpan="2" Spacing="5" Margin="0,0,0,20">
-                    <Image Source="{Binding ImageData, Mode=OneWay, Converter={StaticResource ByteArrayToImageSourceConverter}}" Aspect="AspectFit" WidthRequest="300" HeightRequest="200" HorizontalOptions="Center" />
+                    <Image Source="{Binding ImageData, Converter={StaticResource byteArrayToImageSourceConverter}}" Aspect="AspectFit" WidthRequest="300" HeightRequest="200" HorizontalOptions="Center" />
                     <Button Text="Upload Image" Command="{Binding SelectImageCommand}" HorizontalOptions="Center" BackgroundColor="Black" TextColor="White" />
                 </StackLayout>
 
@@ -47,7 +48,7 @@
                 <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Address}" VerticalOptions="Center" />
 
                 <Label Grid.Row="4" Grid.Column="0" Text="University:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Label Grid.Row="4" Grid.Column="1" Text="{Binding University, TargetNullValue='Select University'}" TextColor="Blue">
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding University, Mode=TwoWay, TargetNullValue='Select University'}" TextColor="Blue">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SelectUniversityCommand}" />
                     </Label.GestureRecognizers>
