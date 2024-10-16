@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:CouchbaseMauiPOC.Pages"
+             xmlns:viewModels="clr-namespace:CouchbaseMauiPOC.ViewModels"
+             x:Class="CouchbaseMauiPOC.Pages.UniversityPage"
+             x:DataType="viewModels:UniversityViewModel"
+             x:TypeArguments="viewModels:UniversityViewModel"
+             Title="UniversityPage">
+        <ContentPage.ToolbarItems>
+            <ToolbarItem Order="Primary" Text="Save" Command="{Binding SaveCommand}" />
+        </ContentPage.ToolbarItems>
+        <ContentPage.Content>
+            <Grid 
+                ColumnDefinitions="auto,*" 
+                RowDefinitions="auto,auto,auto,auto"
+                Margin="50"
+                RowSpacing="40"
+                ColumnSpacing="10">
+                <Label Grid.Row="0" Grid.Column="0" Text="Id" VerticalTextAlignment="Center"/>
+                <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Id}" IsEnabled="False" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Name" VerticalTextAlignment="Center"/>
+                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Name}"/>
+                <Label Grid.Row="2" Grid.Column="0" Text="Country" VerticalTextAlignment="Center"/>
+                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Country}"/>
+                <Label Grid.Row="3" Grid.Column="0" Text="AlphaTwoCode" VerticalTextAlignment="Center"/>
+                <Entry Grid.Row="3" Grid.Column="1" Text="{Binding AlphaTwoCode}"/>
+            </Grid>
+        </ContentPage.Content>
+</pages:BaseContentPage>

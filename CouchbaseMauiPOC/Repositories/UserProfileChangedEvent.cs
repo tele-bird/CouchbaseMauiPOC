@@ -2,14 +2,17 @@ using CouchbaseMauiPOC.Models;
 
 namespace CouchbaseMauiPOC.Repositories;
 
-public class UserProfileChangedEventArgs : EventArgs
+public class QueryResultsChangedEventArgs<TDataEntity> : EventArgs where TDataEntity : DataEntity
 {
-    public UserProfile UserProfile { get; private set;}
+    public List<TDataEntity>? DataEntities { get; private set;}
+    public Exception? Exception {get; private set;}
 
-    public UserProfileChangedEventArgs(UserProfile userProfile)
+    public QueryResultsChangedEventArgs(List<TDataEntity>? dataEntities, Exception? exception)
     {
-        UserProfile = userProfile;
+        DataEntities = dataEntities;
+        Exception = exception;
     }
 }
 
-public delegate void UserProfileChangedEvent(UserProfileChangedEventArgs args);
+public delegate void UserProfileQueryResultsChangedEvent(QueryResultsChangedEventArgs<UserProfile> args);
+public delegate void UniversityQueryResultsChangedEvent(QueryResultsChangedEventArgs<University> args);

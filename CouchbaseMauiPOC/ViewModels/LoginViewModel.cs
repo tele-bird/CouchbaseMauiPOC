@@ -14,6 +14,8 @@ public partial class LoginViewModel : BaseNavigationViewModel
     public LoginViewModel(INavigationService navigationService)
         : base(navigationService)
     {
+        Username = "myusername";
+        Password = "mypassword";
     }
 
     [RelayCommand]

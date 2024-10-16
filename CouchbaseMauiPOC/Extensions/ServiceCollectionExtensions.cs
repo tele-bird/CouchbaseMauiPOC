@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
             navigationService.Register<LoginViewModel, LoginPage>();
             navigationService.Register<UniversitiesViewModel, UniversitiesPage>();
             navigationService.Register<UserProfileViewModel, UserProfilePage>();
+            navigationService.Register<UniversityViewModel, UniversityPage>();
 
             return navigationService;
         });
@@ -25,6 +26,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<UniversitiesPage>();
         services.AddTransient<UserProfileViewModel>();
         services.AddTransient<UserProfilePage>();
+        services.AddTransient<UniversityViewModel>();
+        services.AddTransient<UniversityPage>();
 	
         return services;
     }

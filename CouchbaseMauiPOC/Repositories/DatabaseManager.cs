@@ -145,7 +145,7 @@ public class DatabaseManager : IDisposable
     //     return document.Keys.Contains("somekey") && document["somekey"].Equals("somevalue");
     // }
 
-    void OnReplicatorUpdate(object sender, ReplicatorStatusChangedEventArgs e)
+    void OnReplicatorUpdate(object? sender, ReplicatorStatusChangedEventArgs e)
     {
         if(e.Status.Error != null)
         {

@@ -9,13 +9,70 @@ namespace CouchbaseMauiPOC.Repositories;
 public sealed class UserProfileRepository : BaseRepository, IUserProfileRepository
 {
     private ListenerToken? userQueryToken;
+    private ListenerToken? UserQueryToken
+    {
+        get
+        {
+            return userQueryToken;
+        }
+        set
+        {
+            ArgumentNullException.ThrowIfNull(databaseManager.Database, nameof(databaseManager.Database));
+            if(userQueryToken.HasValue)
+            {
+                databaseManager.Database.GetDefaultCollection().RemoveChangeListener(userQueryToken.Value);
+            }
+            userQueryToken = value;
+        }
+    }
 
-    public event UserProfileChangedEvent? UserProfileChanged;
+
+    public event UserProfileQueryResultsChangedEvent? UserProfileResultsChanged;
 
     public UserProfileRepository(IDatabaseSeedService databaseSeedService)
         : base(databaseSeedService, "userprofile")
+    {
+    }
+
+    private void ExtractResults(List<Result>? results, Action<List<UserProfile>?, Exception?> extractedAction)
+    {
+        List<UserProfile>? userProfiles = null;
+        Exception? exception = null;
+        try
         {
+            ArgumentNullException.ThrowIfNull(results, nameof(results));
+            userProfiles = new List<UserProfile>();
+            foreach (var result in results)
+            {
+                // var jsonResult = result.ToJSON();
+                // Trace.WriteLine($"result[{rowNum}]: {jsonResult}");
+                var dictionary = result.GetDictionary("_default");
+                ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+                // var rowDebugString = dictionary.ToJSON();
+                // Trace.WriteLine($"result[{rowNum}]: {rowDebugString}");
+                var userProfile = new UserProfile
+                {
+                    Id = result.GetString("id"),
+                    Name = dictionary.GetString("name"),
+                    Email = dictionary.GetString("email"),
+                    Address = dictionary.GetString("address"),
+                    ImageData = dictionary.GetBlob("imageData")?.Content,
+                    Description = dictionary.GetString("description"),
+                    University = dictionary.GetString("university")
+                };
+
+                userProfiles.Add(userProfile);
+            }
         }
+        catch(Exception exc)
+        {
+            exception = exc;
+        }
+        finally
+        {
+            extractedAction.Invoke(userProfiles, exception);
+        }
+    }
 
     public async Task<UserProfile?> GetLocalAsync(string userProfileId)
     {
@@ -35,6 +92,7 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
                         Email = document.GetString("email"),
                         Address = document.GetString("address"),
                         ImageData = document.GetBlob("imageData")?.Content,
+                        Description = document.GetString("description"),
                         University = document.GetString("university")
                     };
                 }
@@ -50,27 +108,17 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
 
     public async Task GetAsync(string userProfileId)
     {
-        try
-        {
-            var database = await GetDatabaseAsync();
-            if (database != null)
-            {
-                Trace.WriteLine($"querying for ID = {userProfileId}");
-                userQueryToken = QueryBuilder
-                    .Select(SelectResult.All())
-                    .From(DataSource.Collection(database.GetDefaultCollection()))
-                    // .Where(Expression.Property("name").EqualTo(Expression.String("Phil")))
-                    .Where(Meta.ID.EqualTo(Expression.String(userProfileId)))
-                        .AddChangeListener(HandleUserQueryChanged);
-            }
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine($"UserProfileRepository Exception: {ex.Message}");
-        }
+        var database = await GetDatabaseAsync();
+        ArgumentNullException.ThrowIfNull(database, nameof(database));
+        UserQueryToken = QueryBuilder
+            .Select(SelectResult.Expression(Meta.ID), SelectResult.All())
+            .From(DataSource.Collection(database.GetDefaultCollection()))
+            // .Where(Expression.Property("name").EqualTo(Expression.String("Phil")))
+            .Where(Meta.ID.EqualTo(Expression.String(userProfileId)))
+                .AddChangeListener(HandleQueryResultsChanged);
      }
 
-    private void HandleUserQueryChanged(object? sender, QueryChangedEventArgs e)
+    private void HandleQueryResultsChanged(object? sender, QueryChangedEventArgs e)
     {
         if(e.Error != null)
         {
@@ -79,42 +127,11 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
         else if (e?.Results != null)
         {
             var resultsList = e.Results.AllResults();
-            Trace.WriteLine($"Live query change listener received {resultsList.Count} results.");
-            int i = 1;
-            foreach (var result in resultsList)
+            Trace.WriteLine($"{nameof(UserProfileRepository)}.{nameof(HandleQueryResultsChanged)} >> got {resultsList.Count} results");
+            ExtractResults(resultsList, (userProfiles, exception) =>
             {
-                Trace.WriteLine($"Result #{i} has keys: {string.Join(',',result.Keys)}");
-                foreach(var key in result.Keys)
-                {
-                    var value = result[key];
-                    Trace.WriteLine($"key #{i} has name: {key} and value: {value}");
-                    var dict = result[key].Dictionary;
-                    if(dict != null)
-                    {
-                        OutputResults(dict);
-                    }
-                }
-                var dictionary = result.GetDictionary("_default");
-                if (dictionary != null)
-                {
-                    Trace.WriteLine($"Result #{i} has a userprofile dictionary");
-                    var userProfile = new UserProfile
-                    {
-                        Name = dictionary.GetString("name"),
-                        Email = dictionary.GetString("email"),
-                        Address = dictionary.GetString("address"),
-                        University = dictionary.GetString("university"),
-                        ImageData = dictionary.GetBlob("imageData")?.Content
-                    };
-
-                    UserProfileChanged?.Invoke(new UserProfileChangedEventArgs(userProfile));
-                }
-                else
-                {
-                    Trace.WriteLine($"Result #{i} has NO userprofile dictionary");
-                }
-                ++i;
-            }
+                UserProfileResultsChanged?.Invoke(new QueryResultsChangedEventArgs<UserProfile>(userProfiles, exception));
+            });
         }
     }
 
@@ -148,7 +165,7 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
                 mutableDocument.SetString("email", userProfile.Email);
                 mutableDocument.SetString("address", userProfile.Address);
                 mutableDocument.SetString("university", userProfile.University);
-                mutableDocument.SetString("type", "user");
+                mutableDocument.SetString("type", userProfile.Type);
                 
                 if (userProfile.ImageData != null)
                 {
@@ -173,8 +190,8 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
         return Task.Run(async () => 
         {
             await databaseManager.StartReplicationAsync(
-                AppInstance.User!.Username,
-                AppInstance.User!.Password,
+                AppInstance.User!.Username!,
+                AppInstance.User!.Password!,
                 new string[] { AppInstance.User!.Username! }
             );
         });
@@ -182,12 +199,7 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
 
     public override void Dispose()
     {
-        if(userQueryToken.HasValue && databaseManager.Database != null)
-        {
-            databaseManager.Database.GetDefaultCollection().RemoveChangeListener(userQueryToken.Value);
-            userQueryToken = null;
-        }
-
+        UserQueryToken = null;
         base.Dispose();
     }
 }

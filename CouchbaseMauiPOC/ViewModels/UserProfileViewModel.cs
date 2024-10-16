@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CouchbaseMauiPOC.Models;
@@ -39,10 +40,10 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
 
     public override async Task LoadAsync(bool refresh)
     {
-        await LoadUserProfile();
+        await LoadUserProfileAsync();
     }
 
-    private async Task LoadUserProfile()
+    private async Task LoadUserProfileAsync()
     {
         IsBusy = true;
 
@@ -64,22 +65,40 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
 
         await userProfileRepository.StartReplicationForCurrentUser().ConfigureAwait(false);
 
-        userProfileRepository.UserProfileChanged += UpdateUserProfile;
+        userProfileRepository.UserProfileResultsChanged += UpdateUserProfileResults;
         await userProfileRepository.GetAsync(UserProfileDocId);
 
         IsBusy = false;
     }
 
-    private void UpdateUserProfile(UserProfileChangedEventArgs args)
+    private void UpdateUserProfileResults(QueryResultsChangedEventArgs<UserProfile> args)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
+        try
         {
-            Name = args.UserProfile.Name;
-            Email = args.UserProfile.Email;
-            Address = args.UserProfile.Address;
-            ImageData = args.UserProfile.ImageData;
-            University = args.UserProfile.University;
-        });
+            if(args.Exception != null)
+            {
+                alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
+            }
+            else if(args.DataEntities != null)
+            {
+                if(args.DataEntities.Count != 1)
+                {
+                    throw new ArgumentOutOfRangeException($"Unexpected scenario: ");
+                }
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Name = args.DataEntities[0].Name;
+                    Email = args.DataEntities[0].Email;
+                    Address = args.DataEntities[0].Address;
+                    ImageData = args.DataEntities[0].ImageData;
+                    University = args.DataEntities[0].University;
+                });
+            }
+        }
+        catch(Exception exc)
+        {
+            alertService.ShowMessage(exc.GetType().Name, exc.Message, "OK");
+        }
     }
 
     [RelayCommand]

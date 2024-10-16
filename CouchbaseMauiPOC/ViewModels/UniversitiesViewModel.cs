@@ -1,4 +1,3 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CouchbaseMauiPOC.Models;
@@ -33,6 +32,48 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         this.alertService = alertService;
     }
 
+    private async Task RefreshUniversitiesAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            universityRepository.UniversityResultsChanged += UpdateUniversityResults;
+            await universityRepository.StartsWith(Name, Country);
+        }
+        catch(Exception exc)
+        {
+            await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void UpdateUniversityResults(QueryResultsChangedEventArgs<University> args)
+    {
+        try
+        {
+            if(args.Exception != null)
+            {
+                alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
+            }
+            else if(args.DataEntities != null)
+            {
+                Universities = args.DataEntities;
+            }
+        }
+        catch(Exception exc)
+        {
+            alertService.ShowMessage(exc.GetType().Name, exc.Message, "OK");
+        }
+    }
+
+    public override async Task LoadAsync(bool refresh)
+    {
+        await RefreshUniversitiesAsync();
+    }
+
     [RelayCommand]
     Task SelectUniversity(University university)
     {
@@ -41,18 +82,64 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     }
 
     [RelayCommand]
-    async Task SearchAsync()
+    Task EditUniversity(University university)
     {
-        if(!string.IsNullOrEmpty(Name))
+        return navigationService.PushAsync<UniversityViewModel>(true, (vm) => {
+            vm.Id = university.Id;
+        });
+    }
+
+    [RelayCommand]
+    async Task DeleteUniversity(University university)
+    {
+        var confirmed = await alertService.ShowMessage("Confirm", $"Are you sure you want to permanently delete {university.Name} ?", "Yes", "No");
+        if(confirmed)
         {
-            try
+            var success = await universityRepository.DeleteAsync(university);
+            if(success)
             {
-                Universities = await universityRepository.SearchByName(Name, Country);
+                await alertService.ShowMessage(string.Empty, $"Successfully deleted {university.Name}", "OK");
             }
-            catch(Exception exc)
+            else
             {
-                await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+                await alertService.ShowMessage(string.Empty, $"Error deleting university {university.Name}", "OK");
             }
         }
     }
+
+    [RelayCommand]
+    async Task TextChangedAsync(TextChangedEventArgs args)
+    {
+        await RefreshUniversitiesAsync();
+    }
+
+    [RelayCommand]
+    Task Add()
+    {
+        return navigationService.PushAsync<UniversityViewModel>(true, (vm) => {
+            vm.UniversitySaved = (name) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Name = name;
+                });
+            };
+        });
+    }
+
+    // [RelayCommand]
+    // async Task SearchAsync()
+    // {
+    //     if(!string.IsNullOrEmpty(Name))
+    //     {
+    //         try
+    //         {
+    //             Universities = await universityRepository.SearchByName(Name, Country);
+    //         }
+    //         catch(Exception exc)
+    //         {
+    //             await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+    //         }
+    //     }
+    // }
 }

@@ -3,33 +3,71 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:pages="clr-namespace:CouchbaseMauiPOC.Pages"
              xmlns:controls="clr-namespace:CouchbaseMauiPOC.Controls"
+             xmlns:models="clr-namespace:CouchbaseMauiPOC.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:CouchbaseMauiPOC.ViewModels"
              x:Class="CouchbaseMauiPOC.Pages.UniversitiesPage"
              x:DataType="viewModels:UniversitiesViewModel"
-             x:TypeArguments="viewModels:UniversitiesViewModel">
+             x:TypeArguments="viewModels:UniversitiesViewModel"
+             x:Name="ThisPage">
+             <ContentPage.ToolbarItems>
+                <ToolbarItem Order="Primary" Text="Add" Command="{Binding AddCommand}" />
+             </ContentPage.ToolbarItems>
              <pages:BaseContentPage.Content>
                 <StackLayout>
-                    <SearchBar AutomationId="sbName" Placeholder="Name" Text="{Binding Name}" />
-                    <SearchBar AutomationId="sbCountry" Placeholder="Country (optional)" Text="{Binding Country}" />
-                    <Button AutomationId="btnLookup" Text="Lookup" Command="{Binding SearchCommand}" IsEnabled="{Binding IsSearchEnabled}"
+                    <SearchBar AutomationId="sbName" Placeholder="Name" Text="{Binding Name}">
+                        <SearchBar.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                EventName="TextChanged"
+                                Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.TextChangedCommand}"/>
+                        </SearchBar.Behaviors>
+                    </SearchBar>
+                    <SearchBar AutomationId="sbCountry" Placeholder="Country (optional)" Text="{Binding Country}">
+                        <SearchBar.Behaviors>
+                            <toolkit:EventToCommandBehavior
+                                EventName="TextChanged"
+                                Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.TextChangedCommand}"/>
+                        </SearchBar.Behaviors>
+                    </SearchBar>
+                    <!-- <Button AutomationId="btnLookup" Text="Lookup" Command="{Binding SearchCommand}" IsEnabled="{Binding IsSearchEnabled}"
                         WidthRequest="150" BackgroundColor="Red" TextColor="White" FontAttributes="Bold"
-                        HorizontalOptions="CenterAndExpand" Margin="10" />
+                        HorizontalOptions="CenterAndExpand" Margin="10" /> -->
                     <BoxView BackgroundColor="Gray" HeightRequest="1" HorizontalOptions="FillAndExpand" />
+                    <Label Text="{Binding Universities.Count,StringFormat='{0} universities'}" TextColor="Aquamarine" HorizontalOptions="CenterAndExpand" />
                     <controls:ListView AutomationId="lvItems"
                         ItemsSource="{Binding Universities}"
-                        ItemTappedCommand="{Binding SelectUniversityCommand}"
                         SeparatorVisibility="None"
-                        HasUnevenRows="true">
+                        HasUnevenRows="true"
+                        VerticalScrollBarVisibility="Always">
                         <controls:ListView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:University">
                                 <ViewCell>
-                                    <StackLayout Margin="0">
-                                        <StackLayout Margin="10">
-                                            <Label Text="{Binding Name}" />
-                                            <Label Text="{Binding Country}" FontSize="Small" />
-                                        </StackLayout>
-                                        <BoxView BackgroundColor="Gray" HeightRequest="1" HorizontalOptions="FillAndExpand" />
-                                    </StackLayout>
+                                    <Grid ColumnDefinitions="*,auto,auto,auto" RowDefinitions="*,auto">
+                                        <HorizontalStackLayout Grid.Column="0" Margin="5">
+                                            <VerticalStackLayout Margin="0">
+                                                <Label Text="{Binding Id, TargetNullValue='null'}" />
+                                                <Label Text="{Binding Name, TargetNullValue='null'}" />
+                                                <Label Text="{Binding Country, TargetNullValue='null'}" />
+                                                <Label Text="{Binding AlphaTwoCode, TargetNullValue='null'}" />
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                        <Button Grid.Column="1" Text="Select" TextColor="Aquamarine" BackgroundColor="Transparent" >
+                                            <Button.Behaviors>
+                                                <toolkit:EventToCommandBehavior EventName="Clicked" Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SelectUniversityCommand}" CommandParameter="{Binding .}"/>
+                                            </Button.Behaviors>
+                                        </Button>
+                                        <Button Grid.Column="2" Text="Edit" TextColor="Aquamarine" BackgroundColor="Transparent" >
+                                            <Button.Behaviors>
+                                                <toolkit:EventToCommandBehavior EventName="Clicked" Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.EditUniversityCommand}" CommandParameter="{Binding .}"/>
+                                            </Button.Behaviors>
+                                        </Button>
+                                        <Button Grid.Column="3" Text="Delete" TextColor="Aquamarine" BackgroundColor="Transparent" >
+                                            <Button.Behaviors>
+                                                <toolkit:EventToCommandBehavior EventName="Clicked" Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.DeleteUniversityCommand}" CommandParameter="{Binding .}"/>
+                                            </Button.Behaviors>
+                                        </Button>
+                                        <BoxView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" BackgroundColor="Gray" HeightRequest="1" HorizontalOptions="FillAndExpand" />
+                                    </Grid>
                                 </ViewCell>
                             </DataTemplate>
                         </controls:ListView.ItemTemplate>

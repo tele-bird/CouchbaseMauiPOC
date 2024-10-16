@@ -4,7 +4,7 @@ namespace CouchbaseMauiPOC.Repositories;
 
 public interface IUserProfileRepository : IBaseRepository
 {
-    event UserProfileChangedEvent? UserProfileChanged;
+    event UserProfileQueryResultsChangedEvent? UserProfileResultsChanged;
     Task GetAsync(string userProfileId);
     Task<UserProfile?> GetLocalAsync(string userProfileId);
     Task<bool> SaveAsync(UserProfile userProfile);

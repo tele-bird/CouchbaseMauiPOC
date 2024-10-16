@@ -2,10 +2,9 @@ using System;
 
 namespace CouchbaseMauiPOC.Models;
 
-public class UserProfile
+public class UserProfile : DataEntity
 {
-    public string type => "user";
-    public string? Id {get; set;}
+    public override string Type {get => "user";}
     public string? Name {get; set;}
     public string? Email {get; set;}
     public string? Address {get; set;}
