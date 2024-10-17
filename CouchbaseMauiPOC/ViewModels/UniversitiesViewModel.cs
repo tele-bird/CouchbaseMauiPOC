@@ -75,10 +75,10 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     }
 
     [RelayCommand]
-    Task SelectUniversity(University university)
+    async Task SelectUniversity(University university)
     {
         UniversitySelected?.Invoke(university.Name!);
-        return Dismiss();
+        await Dismiss();
     }
 
     [RelayCommand]
@@ -96,11 +96,7 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         if(confirmed)
         {
             var success = await universityRepository.DeleteAsync(university);
-            if(success)
-            {
-                await alertService.ShowMessage(string.Empty, $"Successfully deleted {university.Name}", "OK");
-            }
-            else
+            if(!success)
             {
                 await alertService.ShowMessage(string.Empty, $"Error deleting university {university.Name}", "OK");
             }

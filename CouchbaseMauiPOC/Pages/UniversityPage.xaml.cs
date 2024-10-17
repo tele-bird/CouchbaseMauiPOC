@@ -9,4 +9,10 @@ public partial class UniversityPage : BaseContentPage<UniversityViewModel>
 	{
 		InitializeComponent();
 	}
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+		IdEntry.Loaded += delegate { IdEntry.Focus(); };
+    }
 }

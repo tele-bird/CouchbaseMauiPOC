@@ -1,30 +1,36 @@
 using System.Diagnostics;
 using Couchbase.Lite;
 using Couchbase.Lite.Query;
-using CouchbaseMauiPOC.Extensions;
 using CouchbaseMauiPOC.Models;
 using CouchbaseMauiPOC.Services;
-using Microsoft.Maui.Controls.Compatibility.Platform.iOS;
 
 namespace CouchbaseMauiPOC.Repositories;
 
 public class UniversityRepository : BaseRepository, IUniversityRepository
 {
-    private ListenerToken? queryToken;
-    private ListenerToken? QueryToken
+    private ListenerToken? startsWithQueryToken;
+    private IQuery? startsWithQuery;
+    private IQuery? StartsWithQuery
     {
         get
         {
-            return queryToken;
+            return startsWithQuery;
         }
         set
         {
-            ArgumentNullException.ThrowIfNull(databaseManager.Database, nameof(databaseManager.Database));
-            if(queryToken.HasValue)
+            // dispose of previous query:
+            if(startsWithQuery != null && startsWithQueryToken.HasValue)
             {
-                databaseManager.Database.GetDefaultCollection().RemoveChangeListener(queryToken.Value);
+                startsWithQuery.RemoveChangeListener(startsWithQueryToken.Value);
+                startsWithQueryToken = null;
+                startsWithQuery.Dispose();
             }
-            queryToken = value;
+
+            // set new value:
+            startsWithQuery = value;
+
+            // subscribe to query changes:
+            startsWithQueryToken = startsWithQuery?.AddChangeListener(HandleQueryResultsChanged);
         }
     }
 
@@ -105,7 +111,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             Id = document.Id,
             Name = document.GetString("name"),
             Country = document.GetString("country"),
-            AlphaTwoCode = document.GetString("alphaTwoCode")
+            AlphaTwoCode = document.GetString("alpha_two_code")
         };
     }
 
@@ -124,15 +130,16 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             var countryQueryExpression = Function.Lower(Expression.Property("country")).Like(Expression.String($"{country.ToLower()}%"));
             whereQueryExpression = whereQueryExpression.And(countryQueryExpression);
         }
-        QueryToken = QueryBuilder.Select(SelectResult.Expression(Meta.ID), SelectResult.All())
+        StartsWithQuery = QueryBuilder.Select(SelectResult.Expression(Meta.ID), SelectResult.All())
             .From(DataSource.Collection(database.GetDefaultCollection()))
             .Where(whereQueryExpression)
-            .OrderBy(Ordering.Property("name").Ascending())
-                .AddChangeListener(HandleQueryResultsChanged);
+            .OrderBy(Ordering.Property("name").Ascending());
+            // .OrderBy(Ordering.Expression(Meta.ID).Ascending());
     }
 
     private void HandleQueryResultsChanged(object? sender, QueryChangedEventArgs e)
     {
+        Trace.WriteLine($"{nameof(UniversityRepository)}.{nameof(HandleQueryResultsChanged)} >> sender: {sender}");
         if(e.Error != null)
         {
             Trace.WriteLine($"Live query change listener received error: {e.Error.GetType().Name}: {e.Error.Message}");
@@ -193,7 +200,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             var mutableDocument = university.Id != null ? new MutableDocument(university.Id) : new MutableDocument();
             mutableDocument.SetString("name", university.Name);
             mutableDocument.SetString("country", university.Country);
-            mutableDocument.SetString("alphaTwoCode", university.AlphaTwoCode);
+            mutableDocument.SetString("alpha_two_code", university.AlphaTwoCode);
             mutableDocument.SetString("type", university.Type);
             
             var database = await GetDatabaseAsync();
@@ -220,7 +227,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
 
     public override void Dispose()
     {
-        QueryToken = null;
+        StartsWithQuery = null;
         base.Dispose();
     }
 }

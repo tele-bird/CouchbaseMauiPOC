@@ -57,25 +57,27 @@ public partial class UniversityViewModel : BaseNavigationViewModel
         {
             await alertService.ShowMessage("Missing", "Both name and country are required.", "OK");
         }
-
-        var university = new University
-        {
-            Id = this.Id,
-            Name = this.Name,
-            Country = this.Country,
-            AlphaTwoCode = this.AlphaTwoCode
-        };
-
-        var newId = await universityRepository.SaveAsync(university).ConfigureAwait(false);
-
-        if(newId != null)
-        {
-            this.Id = newId;
-            await alertService.ShowMessage(string.Empty, $"Successfully updated university to {universityRepository.Path}", "OK");
-        }
         else
         {
-            await alertService.ShowMessage(string.Empty, $"Error updating university to {universityRepository.Path}", "OK");
+            var university = new University
+            {
+                Id = this.Id,
+                Name = this.Name,
+                Country = this.Country,
+                AlphaTwoCode = this.AlphaTwoCode
+            };
+
+            var newId = await universityRepository.SaveAsync(university).ConfigureAwait(false);
+
+            if(newId != null)
+            {
+                this.Id = newId;
+                await Dismiss();
+            }
+            else
+            {
+                await alertService.ShowMessage(string.Empty, $"Error updating university to {universityRepository.Path}", "OK");
+            }
         }
     }
 }
