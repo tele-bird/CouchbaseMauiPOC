@@ -7,5 +7,5 @@ public abstract partial class BaseViewModel : ObservableObject
     [ObservableProperty]
     bool isBusy;
 
-    public virtual Task LoadAsync(bool refresh) => Task.FromResult(true);
+    public virtual Task OnFirstAppearingAsync(bool refresh) => Task.FromResult(true);
 }

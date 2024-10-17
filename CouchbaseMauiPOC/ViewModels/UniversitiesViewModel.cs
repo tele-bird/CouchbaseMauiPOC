@@ -69,7 +69,7 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         }
     }
 
-    public override async Task LoadAsync(bool refresh)
+    public override async Task OnFirstAppearingAsync(bool refresh)
     {
         await RefreshUniversitiesAsync();
     }

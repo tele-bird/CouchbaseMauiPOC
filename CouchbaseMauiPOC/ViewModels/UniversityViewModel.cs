@@ -30,7 +30,7 @@ public partial class UniversityViewModel : BaseNavigationViewModel
         this.alertService = alertService;
     }
 
-    public override async Task LoadAsync(bool refresh)
+    public override async Task OnFirstAppearingAsync(bool refresh)
     {
         if(!string.IsNullOrEmpty(Id))
         {

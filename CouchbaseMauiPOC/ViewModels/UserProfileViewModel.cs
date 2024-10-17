@@ -22,7 +22,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
     [ObservableProperty]
     byte[]? imageData;
     [ObservableProperty]
-    string? university;
+    string? universityName;
 
     string UserProfileDocId => AppInstance.User != null ? $"user::{AppInstance.User!.Username}" : "user::";
 
@@ -38,40 +38,31 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         this.mediaService = mediaService;
     }
 
-    public override async Task LoadAsync(bool refresh)
+    public override async Task OnFirstAppearingAsync(bool refresh)
     {
         await LoadUserProfileAsync();
+        // await userProfileRepository.StartReplicationForCurrentUser().ConfigureAwait(false);
     }
 
     private async Task LoadUserProfileAsync()
     {
         IsBusy = true;
-
-        var userprofile = await userProfileRepository.GetLocalAsync(UserProfileDocId);
-        if(userprofile == null)
+        try
         {
-            userprofile = new UserProfile
-            {
-                Id = UserProfileDocId,
-                Email = AppInstance.User!.Username
-            };
+            userProfileRepository.UserProfileResultChanged += UpdateUserProfileResult;
+            await userProfileRepository.GetAsync(UserProfileDocId);
         }
-
-        Name = userprofile.Name;
-        Email = userprofile.Email;
-        Address = userprofile.Address;
-        ImageData = userprofile.ImageData;
-        University = userprofile.University;
-
-        await userProfileRepository.StartReplicationForCurrentUser().ConfigureAwait(false);
-
-        userProfileRepository.UserProfileResultsChanged += UpdateUserProfileResults;
-        await userProfileRepository.GetAsync(UserProfileDocId);
-
-        IsBusy = false;
+        catch(Exception exc)
+        {
+            await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    private void UpdateUserProfileResults(QueryResultsChangedEventArgs<UserProfile> args)
+    private void UpdateUserProfileResult(QueryResultChangedEventArgs<UserProfile> args)
     {
         try
         {
@@ -79,19 +70,15 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
             {
                 alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
             }
-            else if(args.DataEntities != null)
+            else
             {
-                if(args.DataEntities.Count != 1)
-                {
-                    throw new ArgumentOutOfRangeException($"Unexpected scenario: ");
-                }
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    Name = args.DataEntities[0].Name;
-                    Email = args.DataEntities[0].Email;
-                    Address = args.DataEntities[0].Address;
-                    ImageData = args.DataEntities[0].ImageData;
-                    University = args.DataEntities[0].University;
+                    Name = args.DataEntity?.Name;
+                    Email = args.DataEntity?.Email;
+                    Address = args.DataEntity?.Address;
+                    ImageData = args.DataEntity?.ImageData;
+                    UniversityName = args.DataEntity?.University;
                 });
             }
         }
@@ -111,7 +98,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
             Email = Email,
             Address = Address,
             ImageData = ImageData,
-            University = University
+            University = UniversityName
         };
 
         bool success = await userProfileRepository.SaveAsync(userProfile).ConfigureAwait(false);
@@ -157,7 +144,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                University = name;
+                UniversityName = name;
             });
         };
     }

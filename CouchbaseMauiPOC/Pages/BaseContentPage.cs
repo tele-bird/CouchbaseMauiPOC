@@ -8,6 +8,8 @@ public abstract class BaseContentPage : ContentPage
 
 public abstract class BaseContentPage<TViewModel> : BaseContentPage where TViewModel : BaseViewModel
 {
+	private bool hasAppeared;
+
     public TViewModel ViewModel => (TViewModel)BindingContext;
 
 	protected BaseContentPage(TViewModel viewModel)
@@ -18,9 +20,14 @@ public abstract class BaseContentPage<TViewModel> : BaseContentPage where TViewM
     protected override void OnAppearing()
     {
         base.OnAppearing();
-		Task.Run(async () => 
+		if(!hasAppeared)
 		{
-			await ViewModel!.LoadAsync(true);
-		});
+			Task.Run(async () => 
+			{
+				await ViewModel!.OnFirstAppearingAsync(true);
+			});
+
+			hasAppeared = true;
+		}
     }
 }

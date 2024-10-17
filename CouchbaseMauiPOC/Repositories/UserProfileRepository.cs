@@ -27,84 +27,72 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
     }
 
 
-    public event UserProfileQueryResultsChangedEvent? UserProfileResultsChanged;
+    public event UserProfileQueryResultChangedEvent? UserProfileResultChanged;
 
     public UserProfileRepository(IDatabaseSeedService databaseSeedService)
         : base(databaseSeedService, "userprofile")
     {
     }
 
-    private void ExtractResults(List<Result>? results, Action<List<UserProfile>?, Exception?> extractedAction)
+    private List<UserProfile> ExtractResults(List<Result> results)
     {
-        List<UserProfile>? userProfiles = null;
-        Exception? exception = null;
-        try
+        var userProfiles = new List<UserProfile>();
+        foreach (var result in results)
         {
-            ArgumentNullException.ThrowIfNull(results, nameof(results));
-            userProfiles = new List<UserProfile>();
-            foreach (var result in results)
+            // var jsonResult = result.ToJSON();
+            // Trace.WriteLine($"result[{rowNum}]: {jsonResult}");
+            var dictionary = result.GetDictionary("_default");
+            ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+            // var rowDebugString = dictionary.ToJSON();
+            // Trace.WriteLine($"result[{rowNum}]: {rowDebugString}");
+            var userProfile = new UserProfile
             {
-                // var jsonResult = result.ToJSON();
-                // Trace.WriteLine($"result[{rowNum}]: {jsonResult}");
-                var dictionary = result.GetDictionary("_default");
-                ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-                // var rowDebugString = dictionary.ToJSON();
-                // Trace.WriteLine($"result[{rowNum}]: {rowDebugString}");
-                var userProfile = new UserProfile
-                {
-                    Id = result.GetString("id"),
-                    Name = dictionary.GetString("name"),
-                    Email = dictionary.GetString("email"),
-                    Address = dictionary.GetString("address"),
-                    ImageData = dictionary.GetBlob("imageData")?.Content,
-                    Description = dictionary.GetString("description"),
-                    University = dictionary.GetString("university")
-                };
+                Id = result.GetString("id"),
+                Name = dictionary.GetString("name"),
+                Email = dictionary.GetString("email"),
+                Address = dictionary.GetString("address"),
+                ImageData = dictionary.GetBlob("imageData")?.Content,
+                Description = dictionary.GetString("description"),
+                University = dictionary.GetString("university")
+            };
 
-                userProfiles.Add(userProfile);
-            }
+            userProfiles.Add(userProfile);
         }
-        catch(Exception exc)
-        {
-            exception = exc;
-        }
-        finally
-        {
-            extractedAction.Invoke(userProfiles, exception);
-        }
+
+        return userProfiles;
     }
 
-    public async Task<UserProfile?> GetLocalAsync(string userProfileId)
-    {
-        UserProfile? userProfile = null;
-        try
-        {
-            var database = await GetDatabaseAsync();
-            if (database != null)
-            {
-                var document = database.GetDefaultCollection().GetDocument(userProfileId);
-                if (document != null)
-                {
-                    userProfile = new UserProfile
-                    {
-                        Id = document.Id,
-                        Name = document.GetString("name"),
-                        Email = document.GetString("email"),
-                        Address = document.GetString("address"),
-                        ImageData = document.GetBlob("imageData")?.Content,
-                        Description = document.GetString("description"),
-                        University = document.GetString("university")
-                    };
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine($"UserProfileRepository Exception: {ex.Message}");
-        }
+    // public async Task<UserProfile?> GetLocalAsync(string userProfileId)
+    // {
+    //     UserProfile? userProfile = null;
+    //     try
+    //     {
+    //         var database = await GetDatabaseAsync();
+    //         if (database != null)
+    //         {
+    //             var document = database.GetDefaultCollection().GetDocument(userProfileId);
+    //             if (document != null)
+    //             {
+    //                 userProfile = new UserProfile
+    //                 {
+    //                     Id = document.Id,
+    //                     Name = document.GetString("name"),
+    //                     Email = document.GetString("email"),
+    //                     Address = document.GetString("address"),
+    //                     ImageData = document.GetBlob("imageData")?.Content,
+    //                     Description = document.GetString("description"),
+    //                     University = document.GetString("university")
+    //                 };
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Trace.WriteLine($"UserProfileRepository Exception: {ex.Message}");
+    //     }
         
-        return userProfile;
-     }
+    //     return userProfile;
+    //  }
 
     public async Task GetAsync(string userProfileId)
     {
@@ -120,19 +108,31 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
 
     private void HandleQueryResultsChanged(object? sender, QueryChangedEventArgs e)
     {
+        var resultsChangedEventArgs = new QueryResultChangedEventArgs<UserProfile>();
         if(e.Error != null)
         {
-            Trace.WriteLine($"Live query change listener received error: {e.Error.GetType().Name}: {e.Error.Message}");
+            resultsChangedEventArgs.Exception = e.Error;
         }
-        else if (e?.Results != null)
+        else
         {
-            var resultsList = e.Results.AllResults();
-            Trace.WriteLine($"{nameof(UserProfileRepository)}.{nameof(HandleQueryResultsChanged)} >> got {resultsList.Count} results");
-            ExtractResults(resultsList, (userProfiles, exception) =>
+            try
             {
-                UserProfileResultsChanged?.Invoke(new QueryResultsChangedEventArgs<UserProfile>(userProfiles, exception));
-            });
+                var resultsList = e.Results.AllResults();
+                Trace.WriteLine($"{nameof(UserProfileRepository)}.{nameof(HandleQueryResultsChanged)} >> got {resultsList.Count} results");
+                var userProfiles = ExtractResults(resultsList);
+                if(userProfiles.Count > 1)
+                {
+                    throw new Exception($"Unexpected scenario: query returned {userProfiles.Count} entities.");
+                }
+                resultsChangedEventArgs.DataEntity = userProfiles[0];
+            }
+            catch(Exception exc)
+            {
+                resultsChangedEventArgs.Exception = exc;
+            }
         }
+
+        UserProfileResultChanged?.Invoke(resultsChangedEventArgs);
     }
 
     private void OutputResults(DictionaryObject? result)

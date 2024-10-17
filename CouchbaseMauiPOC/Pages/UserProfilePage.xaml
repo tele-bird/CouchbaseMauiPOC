@@ -35,7 +35,7 @@
                 <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Address}" VerticalOptions="Center" />
 
                 <Label Grid.Row="4" Grid.Column="0" Text="University:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Label Grid.Row="4" Grid.Column="1" Text="{Binding University, TargetNullValue='Select University'}" TextColor="Aquamarine">
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding UniversityName, TargetNullValue='Select University'}" TextColor="Aquamarine">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SelectUniversityCommand}" />
                     </Label.GestureRecognizers>
