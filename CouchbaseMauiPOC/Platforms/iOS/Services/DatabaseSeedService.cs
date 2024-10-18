@@ -1,4 +1,5 @@
 using Foundation;
+using CouchbaseMauiPOC.Infrastructure.Services;
 
 namespace CouchbaseMauiPOC.Services;
 

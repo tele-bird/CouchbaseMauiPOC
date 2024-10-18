@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using Android.Content;
+using CouchbaseMauiPOC.Infrastructure.Services;
 
 namespace CouchbaseMauiPOC.Services;
 

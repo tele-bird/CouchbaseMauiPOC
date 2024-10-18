@@ -1,6 +1,7 @@
-using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Models;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public interface IUserProfileRepository : IBaseRepository
 {
@@ -8,5 +9,5 @@ public interface IUserProfileRepository : IBaseRepository
     Task GetAsync(string userProfileId);
     // Task<UserProfile?> GetLocalAsync(string userProfileId);
     Task<bool> SaveAsync(UserProfile userProfile);
-    Task StartReplicationForCurrentUser();
+    Task StartReplicationForCurrentUser(string username, string password, string[] channels);
 }

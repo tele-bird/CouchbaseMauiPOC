@@ -1,6 +1,6 @@
-using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Infrastructure.Models;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Events;
 
 public class QueryResultsChangedEventArgs<TDataEntity> : EventArgs where TDataEntity : DataEntity
 {

@@ -1,13 +1,18 @@
-using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Models;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public interface IUniversityRepository : IBaseRepository
 {
     // Task<List<University>> All();
     event UniversityQueryResultsChangedEvent? UniversityResultsChanged;
 
-    Task<University?> GetLocalAsync(string id);
+    event UniversityQueryResultChangedEvent? UniversityResultChanged;
+
+    Task GetAsync(string universityId);
+
+    // Task<University?> GetLocalAsync(string id);
 
     Task StartsWith(string? name = null, string? country = null);
 

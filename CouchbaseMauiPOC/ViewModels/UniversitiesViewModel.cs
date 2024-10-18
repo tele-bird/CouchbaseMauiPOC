@@ -1,7 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CouchbaseMauiPOC.Models;
-using CouchbaseMauiPOC.Repositories;
+using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Models;
+using CouchbaseMauiPOC.Infrastructure.Repositories;
 using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.ViewModels;
@@ -23,7 +24,7 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     [ObservableProperty]
     List<University>? universities;
 
-    public Action<string>? UniversitySelected {get; set;}
+    public Action<University>? UniversitySelected {get; set;}
 
     public UniversitiesViewModel(INavigationService navigationService, IUniversityRepository universityRepository, IAlertService alertService)
      : base(navigationService)
@@ -77,7 +78,7 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     [RelayCommand]
     async Task SelectUniversity(University university)
     {
-        UniversitySelected?.Invoke(university.Name!);
+        UniversitySelected?.Invoke(university);
         await Dismiss();
     }
 

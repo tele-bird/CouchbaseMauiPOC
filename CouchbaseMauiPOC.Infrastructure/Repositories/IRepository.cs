@@ -1,4 +1,4 @@
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public interface IRepository<T, K> : IDisposable
 {

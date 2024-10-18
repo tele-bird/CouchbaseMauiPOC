@@ -1,7 +1,7 @@
 using Couchbase.Lite;
-using CouchbaseMauiPOC.Services;
+using CouchbaseMauiPOC.Infrastructure.Services;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public abstract class BaseRepository : IBaseRepository
 {

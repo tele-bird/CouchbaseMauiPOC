@@ -5,18 +5,24 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CouchbaseMauiPOC", "CouchbaseMauiPOC\CouchbaseMauiPOC.csproj", "{5E91C9D8-4CDA-4CB3-BA83-FBFFED7A67E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CouchbaseMauiPOC.Infrastructure", "CouchbaseMauiPOC.Infrastructure\CouchbaseMauiPOC.Infrastructure.csproj", "{5660EC28-FAE3-42CB-A733-D58DAA2870FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5E91C9D8-4CDA-4CB3-BA83-FBFFED7A67E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E91C9D8-4CDA-4CB3-BA83-FBFFED7A67E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E91C9D8-4CDA-4CB3-BA83-FBFFED7A67E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E91C9D8-4CDA-4CB3-BA83-FBFFED7A67E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

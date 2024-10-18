@@ -65,6 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Events/" />
 	  <Folder Include="Platforms/Android/Assets/" />
 	  <Folder Include="Platforms/iOS/universities.cblite2/" />
 	</ItemGroup>
@@ -78,6 +79,9 @@
 		</Content>
 		<Content Include="Platforms\iOS\universities.cblite2\db.sqlite3-wal">
 		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\CouchbaseMauiPOC.Infrastructure\CouchbaseMauiPOC.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>

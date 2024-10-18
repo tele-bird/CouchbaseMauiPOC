@@ -1,4 +1,4 @@
-namespace CouchbaseMauiPOC.Services;
+namespace CouchbaseMauiPOC.Infrastructure.Services;
 
 public interface IDatabaseSeedService
 {

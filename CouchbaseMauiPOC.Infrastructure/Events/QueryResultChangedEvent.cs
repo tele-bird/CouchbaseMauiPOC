@@ -1,6 +1,6 @@
-using CouchbaseMauiPOC.Models;
+using CouchbaseMauiPOC.Infrastructure.Models;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Events;
 
 public class QueryResultChangedEventArgs<TDataEntity> : EventArgs where TDataEntity : DataEntity
 {
@@ -15,4 +15,5 @@ public class QueryResultChangedEventArgs<TDataEntity> : EventArgs where TDataEnt
 }
 
 public delegate void UserProfileQueryResultChangedEvent(QueryResultChangedEventArgs<UserProfile> args);
+public delegate void UniversityQueryResultChangedEvent(QueryResultChangedEventArgs<University> args);
 

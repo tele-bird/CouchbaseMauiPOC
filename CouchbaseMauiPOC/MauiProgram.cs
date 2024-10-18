@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using CouchbaseMauiPOC.Extensions;
-using CouchbaseMauiPOC.Repositories;
+using CouchbaseMauiPOC.Infrastructure.Repositories;
+using CouchbaseMauiPOC.Infrastructure.Services;
 using CouchbaseMauiPOC.Services;
 using Microsoft.Extensions.Logging;
 

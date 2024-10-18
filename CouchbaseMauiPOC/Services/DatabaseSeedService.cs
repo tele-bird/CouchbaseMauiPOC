@@ -1,3 +1,5 @@
+using CouchbaseMauiPOC.Infrastructure.Services;
+
 namespace CouchbaseMauiPOC.Services;
 
 public partial class DatabaseSeedService : IDatabaseSeedService

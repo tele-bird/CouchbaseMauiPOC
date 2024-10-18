@@ -12,7 +12,7 @@
              NavigationPage.HasBackButton="False">
         <ContentPage.Resources>
             <ResourceDictionary>
-                <converters:ByteToImageSourceConverter x:Key="byteArrayToImageSourceConverter"/>
+                <converters:ByteToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
             </ResourceDictionary>
         </ContentPage.Resources>
         <ContentPage.ToolbarItems>
@@ -21,21 +21,21 @@
         <ContentPage.Content>
              <Grid Margin="25,40" RowSpacing="20" ColumnSpacing="20" ColumnDefinitions="auto,*" RowDefinitions="auto,auto,auto,auto,auto,*">
                 <StackLayout Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Spacing="5" Margin="0,0,0,20">
-                    <Image Source="{Binding ImageData, Converter={StaticResource byteArrayToImageSourceConverter}}" Aspect="AspectFit" WidthRequest="300" HeightRequest="200" HorizontalOptions="Center" />
+                    <Image Source="{Binding UserProfile.ImageData, Converter={StaticResource ByteArrayToImageSourceConverter}, TargetNullValue='profile_placeholder.png'}" Aspect="AspectFit" WidthRequest="300" HeightRequest="200" HorizontalOptions="Center" />
                     <Button Text="Upload Image" Command="{Binding SelectImageCommand}" HorizontalOptions="Center" BackgroundColor="Black" TextColor="White" />
                 </StackLayout>
 
                 <Label Grid.Row="1" Grid.Column="0" Text="Name:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding UserProfile.Name, TargetNullValue=''}" VerticalOptions="Center" />
 
                 <Label Grid.Row="2" Grid.Column="0" Text="Email:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Email}" VerticalOptions="Center" IsEnabled="false" />
+                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding UserProfile.Email, TargetNullValue=''}" VerticalOptions="Center" IsEnabled="false" />
 
                 <Label Grid.Row="3" Grid.Column="0" Text="Address:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Entry Grid.Row="3" Grid.Column="1" Text="{Binding Address}" VerticalOptions="Center" />
+                <Entry Grid.Row="3" Grid.Column="1" Text="{Binding UserProfile.Address, TargetNullValue=''}" VerticalOptions="Center" />
 
                 <Label Grid.Row="4" Grid.Column="0" Text="University:" HorizontalOptions="End" VerticalOptions="Center" />
-                <Label Grid.Row="4" Grid.Column="1" Text="{Binding UniversityName, TargetNullValue='Select University'}" TextColor="Aquamarine">
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding University.Name, FallbackValue='Select University'}" TextColor="Aquamarine">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SelectUniversityCommand}" />
                     </Label.GestureRecognizers>

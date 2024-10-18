@@ -21,14 +21,14 @@
                 Margin="50"
                 RowSpacing="40"
                 ColumnSpacing="10">
-                <Label Grid.Row="0" Grid.Column="0" Text="Id" VerticalTextAlignment="Center" IsVisible="{Binding Id,Converter={StaticResource IsNotNullConverter}}"/>
-                <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Id}" IsEnabled="False" IsVisible="{Binding Id,Converter={StaticResource IsNotNullConverter}}"/>
+                <Label Grid.Row="0" Grid.Column="0" Text="Id" VerticalTextAlignment="Center" IsVisible="{Binding University,Converter={StaticResource IsNotNullConverter}}"/>
+                <Entry Grid.Row="0" Grid.Column="1" Text="{Binding University.Id}" IsEnabled="False" IsVisible="{Binding University,Converter={StaticResource IsNotNullConverter}}"/>
                 <Label Grid.Row="1" Grid.Column="0" Text="Name" VerticalTextAlignment="Center"/>
-                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Name}" x:Name="IdEntry"/>
+                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding University.Name}" x:Name="IdEntry"/>
                 <Label Grid.Row="2" Grid.Column="0" Text="Country" VerticalTextAlignment="Center"/>
-                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Country}"/>
+                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding University.Country}"/>
                 <Label Grid.Row="3" Grid.Column="0" Text="AlphaTwoCode" VerticalTextAlignment="Center"/>
-                <Entry Grid.Row="3" Grid.Column="1" Text="{Binding AlphaTwoCode}"/>
+                <Entry Grid.Row="3" Grid.Column="1" Text="{Binding University.AlphaTwoCode}"/>
             </Grid>
         </ContentPage.Content>
 </pages:BaseContentPage>

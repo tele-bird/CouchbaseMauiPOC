@@ -3,9 +3,9 @@ using Couchbase.Lite;
 using Couchbase.Lite.DI;
 using Couchbase.Lite.Query;
 using Couchbase.Lite.Sync;
-using CouchbaseMauiPOC.Services;
+using CouchbaseMauiPOC.Infrastructure.Services;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public class DatabaseManager : IDisposable
 {
@@ -24,16 +24,19 @@ public class DatabaseManager : IDisposable
         this.databaseSeedService = databaseSeedService;
         this.databaseName = databaseName;
 
-        if(DeviceInfo.Current.Platform == DevicePlatform.Android)
-        {
-            // note: user "10.0.2.2" when using an Android emulator
-            remoteSyncUrl = new Uri("wss://ofw9ujauhjnzsf1f.apps.cloud.couchbase.com:4984/userprofile-endpoint");
-        }
-        else
-        {
-            // note: user 'localhost' when using an iOS simulator
-            remoteSyncUrl = new Uri("wss://ofw9ujauhjnzsf1f.apps.cloud.couchbase.com:4984/userprofile-endpoint");
-        }
+
+        remoteSyncUrl = new Uri("wss://ofw9ujauhjnzsf1f.apps.cloud.couchbase.com:4984/userprofile-endpoint");
+        
+        // if(DeviceInfo.Current.Platform == DevicePlatform.Android)
+        // {
+        //     // note: user "10.0.2.2" when using an Android emulator
+        //     remoteSyncUrl = new Uri("wss://ofw9ujauhjnzsf1f.apps.cloud.couchbase.com:4984/userprofile-endpoint");
+        // }
+        // else
+        // {
+        //     // note: user 'localhost' when using an iOS simulator
+        //     remoteSyncUrl = new Uri("wss://ofw9ujauhjnzsf1f.apps.cloud.couchbase.com:4984/userprofile-endpoint");
+        // }
     }
 
     public async Task<Database> GetDatabaseAsync()
@@ -45,7 +48,7 @@ public class DatabaseManager : IDisposable
                 var defaultDirectory = Service.GetInstance<IDefaultDirectoryResolver>()!.DefaultDirectory();
                 var databaseConfig = new DatabaseConfiguration
                 {
-                    Directory = Path.Combine(defaultDirectory, AppInstance.User!.Username!)
+                    Directory = Path.Combine(defaultDirectory, databaseName)
                 };
 
                 Trace.WriteLine($"Creating {databaseName} database at path: {databaseConfig.Directory}");

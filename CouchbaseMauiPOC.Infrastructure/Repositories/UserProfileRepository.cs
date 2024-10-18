@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using Couchbase.Lite;
 using Couchbase.Lite.Query;
-using CouchbaseMauiPOC.Models;
-using CouchbaseMauiPOC.Services;
+using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Models;
+using CouchbaseMauiPOC.Infrastructure.Services;
 
-namespace CouchbaseMauiPOC.Repositories;
+namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public sealed class UserProfileRepository : BaseRepository, IUserProfileRepository
 {
@@ -53,7 +54,7 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
                 Address = dictionary.GetString("address"),
                 ImageData = dictionary.GetBlob("imageData")?.Content,
                 Description = dictionary.GetString("description"),
-                University = dictionary.GetString("university")
+                UniversityId = dictionary.GetString("university_id")
             };
 
             userProfiles.Add(userProfile);
@@ -94,15 +95,15 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
     //     return userProfile;
     //  }
 
-    public async Task GetAsync(string userProfileId)
+    public async Task GetAsync(string email)
     {
         var database = await GetDatabaseAsync();
         ArgumentNullException.ThrowIfNull(database, nameof(database));
         UserQueryToken = QueryBuilder
             .Select(SelectResult.Expression(Meta.ID), SelectResult.All())
             .From(DataSource.Collection(database.GetDefaultCollection()))
-            // .Where(Expression.Property("name").EqualTo(Expression.String("Phil")))
-            .Where(Meta.ID.EqualTo(Expression.String(userProfileId)))
+            .Where(Expression.Property("type").EqualTo(Expression.String("user"))
+            .And(Function.Lower(Expression.Property("email")).Like(Expression.String($"{email.ToLower()}%"))))
                 .AddChangeListener(HandleQueryResultsChanged);
      }
 
@@ -164,7 +165,7 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
                 mutableDocument.SetString("name", userProfile.Name);
                 mutableDocument.SetString("email", userProfile.Email);
                 mutableDocument.SetString("address", userProfile.Address);
-                mutableDocument.SetString("university", userProfile.University);
+                mutableDocument.SetString("university_id", userProfile.UniversityId);
                 mutableDocument.SetString("type", userProfile.Type);
                 
                 if (userProfile.ImageData != null)
@@ -185,15 +186,17 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
         return false;
       }
 
-    public Task StartReplicationForCurrentUser()
+    public Task StartReplicationForCurrentUser(
+        string username,
+        string password,
+        string[] channels)
     {
         return Task.Run(async () => 
         {
             await databaseManager.StartReplicationAsync(
-                AppInstance.User!.Username!,
-                AppInstance.User!.Password!,
-                new string[] { AppInstance.User!.Username! }
-            );
+                username,
+                password,
+                channels);
         });
     }
 

@@ -1,8 +1,8 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CouchbaseMauiPOC.Models;
-using CouchbaseMauiPOC.Repositories;
+using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Models;
+using CouchbaseMauiPOC.Infrastructure.Repositories;
 using CouchbaseMauiPOC.Services;
 
 namespace CouchbaseMauiPOC.ViewModels;
@@ -12,14 +12,10 @@ public partial class UniversityViewModel : BaseNavigationViewModel
     private readonly IUniversityRepository universityRepository;
     private readonly IAlertService alertService;
 
+    public string? Id {get; set;}
+
     [ObservableProperty]
-    string? id;
-    [ObservableProperty]
-    string? name;
-    [ObservableProperty]
-    string? country;
-    [ObservableProperty]
-    string? alphaTwoCode;
+    private University university;
 
     public Action<string>? UniversitySaved {get; set;}
 
@@ -28,50 +24,68 @@ public partial class UniversityViewModel : BaseNavigationViewModel
     {
         this.universityRepository = universityRepository;
         this.alertService = alertService;
+        this.University = new University();
+        universityRepository.UniversityResultChanged += UpdateUniversityResult;
     }
 
     public override async Task OnFirstAppearingAsync(bool refresh)
     {
-        if(!string.IsNullOrEmpty(Id))
+        await LoadUniversityAsync();
+    }
+
+    private async Task LoadUniversityAsync()
+    {
+        IsBusy = true;
+        try
         {
-            var universityToEdit = await universityRepository.GetLocalAsync(Id);
-            if(universityToEdit == null)
+            if(!string.IsNullOrEmpty(Id))
             {
-                await alertService.ShowMessage("Error", $"Whoa, I didn't find a University with id: {Id}", "Close");
-                _ = Dismiss();
+                await universityRepository.GetAsync(Id);
             }
-            else
+        }
+        catch(Exception exc)
+        {
+            await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async void UpdateUniversityResult(QueryResultChangedEventArgs<University> args)
+    {
+        try
+        {
+            if(args.Exception != null)
             {
-                this.Id = universityToEdit.Id;
-                this.Name = universityToEdit.Name;
-                this.Country = universityToEdit.Country;
-                this.AlphaTwoCode = universityToEdit.AlphaTwoCode;
+                await alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
             }
+            else if(args.DataEntity != null)
+            {
+                University = args.DataEntity;
+            }
+        }
+        catch(Exception exc)
+        {
+            await alertService.ShowMessage(exc.GetType().Name, exc.Message, "OK");
         }
     }
 
     [RelayCommand]
     async Task Save()
     {
-        if(string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Country))
+        if(string.IsNullOrEmpty(University.Name) || string.IsNullOrEmpty(University.Country))
         {
             await alertService.ShowMessage("Missing", "Both name and country are required.", "OK");
         }
         else
         {
-            var university = new University
-            {
-                Id = this.Id,
-                Name = this.Name,
-                Country = this.Country,
-                AlphaTwoCode = this.AlphaTwoCode
-            };
-
-            var newId = await universityRepository.SaveAsync(university).ConfigureAwait(false);
+            var newId = await universityRepository.SaveAsync(University).ConfigureAwait(false);
 
             if(newId != null)
             {
-                this.Id = newId;
+                University.Id = newId;
                 await Dismiss();
             }
             else
