@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "dotnet: build",
             "program": "${workspaceFolder}/CouchbaseMauiPOC.Console/bin/Debug/net8.0/CouchbaseMauiPOC.Console.dll",
-            "args": ["/Users/phadley/Library/Containers/com.companyname.couchbasemauipoc/Data/Library/Application Support/CouchbaseLite"],
+            "args": ["${userHome}/Library/Containers/com.companyname.couchbasemauipoc/Data/Library/Application Support/CouchbaseLite"],
             "cwd": "${workspaceFolder}/CouchbaseMauiPOC.Console",
             "stopAtEntry": false,
             "console": "integratedTerminal"

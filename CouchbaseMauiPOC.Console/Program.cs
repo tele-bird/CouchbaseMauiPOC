@@ -90,6 +90,7 @@ internal class Program
             if(Int32.TryParse(keyInfo.KeyChar.ToString(), out choice) && choice >=0 && choice < baseRepositories.Count())
             {
                 result = choice;
+                Console.WriteLine($" => {baseRepositories[result.Value].GetType().Name}");
             }
             else
             {
