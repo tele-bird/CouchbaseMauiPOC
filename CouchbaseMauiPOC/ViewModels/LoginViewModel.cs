@@ -11,25 +11,37 @@ public partial class LoginViewModel : BaseNavigationViewModel
     [ObservableProperty]
     string? password;
 
-    public LoginViewModel(INavigationService navigationService)
-        : base(navigationService)
+    public LoginViewModel(
+        INavigationService navigationService,
+        IAlertService alertService)
+        : base(navigationService, alertService)
     {
         Username = "myusername";
         Password = "mypassword";
     }
 
     [RelayCommand]
-    void SignIn()
+    async Task SignInAsync()
     {
-        if(!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password))
+        try
         {
-            AppInstance.User = new Models.UserCredentials
+            if(!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password))
             {
-                Username = Username,
-                Password = Password
-            };
+                AppInstance.User = new Models.UserCredentials
+                {
+                    Username = Username,
+                    Password = Password
+                };
 
-            navigationService.PushAsync<UserProfileViewModel>(true);
+                await navigationService.PushAsync<UserProfileViewModel>(true, (vm) =>
+                {
+                    vm.UserProfile.Email = Username;
+                });
+            }
+        }
+        catch(Exception exc)
+        {
+            await HandleExceptionAsync(exc);
         }
     }
 }

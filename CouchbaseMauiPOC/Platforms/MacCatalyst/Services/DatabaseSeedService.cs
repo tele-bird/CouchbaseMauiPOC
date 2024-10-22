@@ -1,5 +1,6 @@
 using Foundation;
 using CouchbaseMauiPOC.Infrastructure.Services;
+using System.Diagnostics;
 
 namespace CouchbaseMauiPOC.Services;
 
@@ -11,6 +12,7 @@ public partial class DatabaseSeedService : IDatabaseSeedService
         Directory.CreateDirectory(finalPath);
         var sourcePath = Path.Combine(NSBundle.MainBundle.ResourcePath, "Platforms/iOS/universities.cblite2");
         var dirInfo = new DirectoryInfo(sourcePath);
+        Trace.WriteLine($"Getting universities from: {dirInfo.FullName}");
 
         foreach (var file in dirInfo.EnumerateFiles())
         {

@@ -1,26 +1,27 @@
 using Couchbase.Lite;
-using CouchbaseMauiPOC.Infrastructure.Services;
 
 namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public abstract class BaseRepository : IBaseRepository
 {
-    protected DatabaseManager databaseManager;
+    protected readonly Sources.DataSource DataSource;
 
-    public string? Path => databaseManager.Database?.Path;
+    public string? Path => DataSource.Database?.Path;
 
-    protected BaseRepository(IDatabaseSeedService databaseSeedService, string databaseName)
+    protected BaseRepository(Sources.DataSource dataSource)
     {
-        databaseManager = new DatabaseManager(databaseSeedService, databaseName);
+        this.DataSource = dataSource;
     }
 
     protected virtual Task<Database> GetDatabaseAsync()
-{
-        return databaseManager.GetDatabaseAsync();
+    {
+        return DataSource.GetDatabaseAsync();
     }
+
+    public abstract Task GetAsync(string id);
+
 
     public virtual void Dispose()
     {
-        databaseManager.Dispose();
     }
 }

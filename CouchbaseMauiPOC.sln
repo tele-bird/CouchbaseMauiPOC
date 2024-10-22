@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CouchbaseMauiPOC", "Couchba
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CouchbaseMauiPOC.Infrastructure", "CouchbaseMauiPOC.Infrastructure\CouchbaseMauiPOC.Infrastructure.csproj", "{5660EC28-FAE3-42CB-A733-D58DAA2870FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CouchbaseMauiPOC.Console", "CouchbaseMauiPOC.Console\CouchbaseMauiPOC.Console.csproj", "{39AA84D0-1C08-4A33-B4D0-3C400A00DC93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5660EC28-FAE3-42CB-A733-D58DAA2870FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39AA84D0-1C08-4A33-B4D0-3C400A00DC93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39AA84D0-1C08-4A33-B4D0-3C400A00DC93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39AA84D0-1C08-4A33-B4D0-3C400A00DC93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39AA84D0-1C08-4A33-B4D0-3C400A00DC93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

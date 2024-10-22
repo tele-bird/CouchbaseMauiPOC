@@ -64,8 +64,8 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
     public event UniversityQueryResultsChangedEvent? UniversityResultsChanged;
     public event UniversityQueryResultChangedEvent? UniversityResultChanged;
 
-    public UniversityRepository(IDatabaseSeedService databaseSeedService)
-        : base(databaseSeedService, "universities")
+    public UniversityRepository(Sources.UniversityDataSource universityDataSource)
+        : base(universityDataSource)
     {
     }
 
@@ -131,15 +131,15 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
     //     };
     // }
 
-    public async Task GetAsync(string universityId)
+    public override async Task GetAsync(string id)
     {
         var database = await GetDatabaseAsync();
         ArgumentNullException.ThrowIfNull(database, nameof(database));
         UniversityQuery = QueryBuilder
             .Select(SelectResult.Expression(Meta.ID), SelectResult.All())
-            .From(DataSource.Collection(database.GetDefaultCollection()))
+            .From(Couchbase.Lite.Query.DataSource.Collection(database.GetDefaultCollection()))
             .Where(Expression.Property("type").EqualTo(Expression.String("university"))
-            .And(Meta.ID.EqualTo(Expression.String(universityId))));
+            .And(Meta.ID.EqualTo(Expression.String(id))));
      }
 
     public async Task StartsWith(string? name = null, string? country = null)
@@ -158,7 +158,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             whereQueryExpression = whereQueryExpression.And(countryQueryExpression);
         }
         StartsWithQuery = QueryBuilder.Select(SelectResult.Expression(Meta.ID), SelectResult.All())
-            .From(DataSource.Collection(database.GetDefaultCollection()))
+            .From(Couchbase.Lite.Query.DataSource.Collection(database.GetDefaultCollection()))
             .Where(whereQueryExpression)
             .OrderBy(Ordering.Property("name").Ascending());
             // .OrderBy(Ordering.Expression(Meta.ID).Ascending());

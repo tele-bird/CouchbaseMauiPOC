@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CouchbaseMauiPOC.Extensions;
-using CouchbaseMauiPOC.Infrastructure.Repositories;
+using CouchbaseMauiPOC.Infrastructure.Extensions;
 using CouchbaseMauiPOC.Infrastructure.Services;
 using CouchbaseMauiPOC.Services;
 using Microsoft.Extensions.Logging;
@@ -28,8 +28,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAlertService, AlertService>();
 		builder.Services.AddSingleton<IMediaService, MediaService>();
 		builder.Services.AddSingleton<IDatabaseSeedService, DatabaseSeedService>();
-		builder.Services.AddSingleton<IUserProfileRepository, UserProfileRepository>();
-		builder.Services.AddSingleton<IUniversityRepository, UniversityRepository>();
+		builder.Services.AddDataServices();
 		builder.Services.AddNavigation();
 
 #if ANDROID

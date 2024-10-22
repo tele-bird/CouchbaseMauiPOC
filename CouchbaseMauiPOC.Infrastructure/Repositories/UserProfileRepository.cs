@@ -3,7 +3,6 @@ using Couchbase.Lite;
 using Couchbase.Lite.Query;
 using CouchbaseMauiPOC.Infrastructure.Events;
 using CouchbaseMauiPOC.Infrastructure.Models;
-using CouchbaseMauiPOC.Infrastructure.Services;
 
 namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
@@ -18,10 +17,10 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
         }
         set
         {
-            ArgumentNullException.ThrowIfNull(databaseManager.Database, nameof(databaseManager.Database));
+            ArgumentNullException.ThrowIfNull(DataSource.Database, nameof(DataSource.Database));
             if(userQueryToken.HasValue)
             {
-                databaseManager.Database.GetDefaultCollection().RemoveChangeListener(userQueryToken.Value);
+                DataSource.Database.GetDefaultCollection().RemoveChangeListener(userQueryToken.Value);
             }
             userQueryToken = value;
         }
@@ -30,8 +29,8 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
 
     public event UserProfileQueryResultChangedEvent? UserProfileResultChanged;
 
-    public UserProfileRepository(IDatabaseSeedService databaseSeedService)
-        : base(databaseSeedService, "userprofile")
+    public UserProfileRepository(Sources.UserProfileDataSource userProfileDataSource)
+        : base(userProfileDataSource)
     {
     }
 
@@ -95,13 +94,13 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
     //     return userProfile;
     //  }
 
-    public async Task GetAsync(string email)
+    public override async Task GetAsync(string email)
     {
         var database = await GetDatabaseAsync();
         ArgumentNullException.ThrowIfNull(database, nameof(database));
         UserQueryToken = QueryBuilder
             .Select(SelectResult.Expression(Meta.ID), SelectResult.All())
-            .From(DataSource.Collection(database.GetDefaultCollection()))
+            .From(Couchbase.Lite.Query.DataSource.Collection(database.GetDefaultCollection()))
             .Where(Expression.Property("type").EqualTo(Expression.String("user"))
             .And(Function.Lower(Expression.Property("email")).Like(Expression.String($"{email.ToLower()}%"))))
                 .AddChangeListener(HandleQueryResultsChanged);
@@ -125,7 +124,14 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
                 {
                     throw new Exception($"Unexpected scenario: query returned {userProfiles.Count} entities.");
                 }
-                resultsChangedEventArgs.DataEntity = userProfiles[0];
+                else if(userProfiles.Count == 1)
+                {
+                    resultsChangedEventArgs.DataEntity = userProfiles[0];
+                }
+                else
+                {
+                    // no data found, so don't set the nullable DataEntity property
+                }
             }
             catch(Exception exc)
             {
@@ -185,20 +191,6 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
         
         return false;
       }
-
-    public Task StartReplicationForCurrentUser(
-        string username,
-        string password,
-        string[] channels)
-    {
-        return Task.Run(async () => 
-        {
-            await databaseManager.StartReplicationAsync(
-                username,
-                password,
-                channels);
-        });
-    }
 
     public override void Dispose()
     {

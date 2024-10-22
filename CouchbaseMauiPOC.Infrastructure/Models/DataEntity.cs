@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CouchbaseMauiPOC.Infrastructure.Models;

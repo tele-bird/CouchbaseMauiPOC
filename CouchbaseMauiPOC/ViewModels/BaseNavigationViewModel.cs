@@ -6,7 +6,8 @@ public abstract class BaseNavigationViewModel : BaseViewModel
 {
     protected readonly INavigationService navigationService;
 
-    protected BaseNavigationViewModel(INavigationService navigationService)
+    protected BaseNavigationViewModel(INavigationService navigationService, IAlertService alertService)
+        : base(alertService)
     {
         this.navigationService = navigationService;
     }

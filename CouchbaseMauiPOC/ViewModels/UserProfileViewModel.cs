@@ -2,6 +2,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Extensions;
 using CouchbaseMauiPOC.Infrastructure.Models;
 using CouchbaseMauiPOC.Infrastructure.Repositories;
 using CouchbaseMauiPOC.Services;
@@ -12,7 +13,6 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
 {
     private readonly IUserProfileRepository userProfileRepository;
     private readonly IUniversityRepository universityRepository;
-    private readonly IAlertService alertService;
     private readonly IMediaService mediaService;
 
     [ObservableProperty]
@@ -28,25 +28,20 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         IUniversityRepository universityRepository,
         IAlertService alertService, 
         IMediaService mediaService)
-        : base(navigationService)
+        : base(navigationService, alertService)
     {
         this.guid = Guid.NewGuid();
         this.userProfileRepository = userProfileRepository;
         this.universityRepository = universityRepository;
-        this.alertService = alertService;
         this.mediaService = mediaService;
-        this.UserProfile = new UserProfile
-        {
-            Email = AppInstance.User!.Username
-        };
-        userProfileRepository.UserProfileResultChanged += UpdateUserProfileResult;
+        this.UserProfile = new UserProfile();
+        userProfileRepository.UserProfileResultChanged += UpdateUserProfileResultAsync;
         universityRepository.UniversityResultChanged += UpdateUniversityResult;
     }
 
     public override async Task OnFirstAppearingAsync(bool refresh)
     {
         await LoadUserProfileAsync();
-        // await userProfileRepository.StartReplicationForCurrentUser().ConfigureAwait(false);
     }
 
     private async Task LoadUserProfileAsync()
@@ -59,7 +54,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         }
         catch(Exception exc)
         {
-            await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+            await HandleExceptionAsync(exc);
         }
         finally
         {
@@ -67,14 +62,14 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         }
     }
 
-    private async void UpdateUserProfileResult(QueryResultChangedEventArgs<UserProfile> args)
+    private async void UpdateUserProfileResultAsync(QueryResultChangedEventArgs<UserProfile> args)
     {
-        Trace.WriteLine($"{guid}: {nameof(UserProfileViewModel)}.{nameof(UpdateUserProfileResult)} >> Error:{args.Exception} DataEntity:{args.DataEntity?.Email}");
+        Trace.WriteLine($"{guid}: {nameof(UserProfileViewModel)}.{nameof(UpdateUserProfileResultAsync)} >> Error:{args.Exception.ToDebugString()} DataEntity:{args.DataEntity.ToDebugString<UserProfile>()}");
         try
         {
             if(args.Exception != null)
             {
-                await alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
+                await HandleExceptionAsync(args.Exception);
             }
             else if(args.DataEntity != null)
             {
@@ -91,7 +86,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         }
         catch(Exception exc)
         {
-            await alertService.ShowMessage(exc.GetType().Name, exc.Message, "OK");
+            await HandleExceptionAsync(exc);
         }
     }
 
@@ -158,7 +153,7 @@ public partial class UserProfileViewModel : BaseNavigationViewModel
         userProfileRepository.Dispose();
         AppInstance.User = null;
         navigationService.PopAsync(false);
-        userProfileRepository.UserProfileResultChanged -= UpdateUserProfileResult;
+        userProfileRepository.UserProfileResultChanged -= UpdateUserProfileResultAsync;
         universityRepository.UniversityResultChanged -= UpdateUniversityResult;
     }
 

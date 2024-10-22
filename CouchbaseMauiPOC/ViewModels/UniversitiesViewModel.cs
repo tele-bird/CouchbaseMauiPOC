@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CouchbaseMauiPOC.Infrastructure.Events;
+using CouchbaseMauiPOC.Infrastructure.Extensions;
 using CouchbaseMauiPOC.Infrastructure.Models;
 using CouchbaseMauiPOC.Infrastructure.Repositories;
 using CouchbaseMauiPOC.Services;
@@ -10,7 +12,6 @@ namespace CouchbaseMauiPOC.ViewModels;
 public partial class UniversitiesViewModel : BaseNavigationViewModel
 {
     private readonly IUniversityRepository universityRepository;
-    private readonly IAlertService alertService;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSearchEnabled))]
@@ -27,10 +28,9 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
     public Action<University>? UniversitySelected {get; set;}
 
     public UniversitiesViewModel(INavigationService navigationService, IUniversityRepository universityRepository, IAlertService alertService)
-     : base(navigationService)
+     : base(navigationService, alertService)
      {
         this.universityRepository = universityRepository;
-        this.alertService = alertService;
     }
 
     private async Task RefreshUniversitiesAsync()
@@ -38,12 +38,12 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         IsBusy = true;
         try
         {
-            universityRepository.UniversityResultsChanged += UpdateUniversityResults;
+            universityRepository.UniversityResultsChanged += UpdateUniversityResultsAsync;
             await universityRepository.StartsWith(Name, Country);
         }
         catch(Exception exc)
         {
-            await alertService.ShowMessage(exc.GetType().FullName!, exc.Message, "OK");
+            await HandleExceptionAsync(exc);
         }
         finally
         {
@@ -51,13 +51,13 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         }
     }
 
-    private void UpdateUniversityResults(QueryResultsChangedEventArgs<University> args)
+    private async void UpdateUniversityResultsAsync(QueryResultsChangedEventArgs<University> args)
     {
         try
         {
             if(args.Exception != null)
             {
-                alertService.ShowMessage(args.Exception.GetType().Name, args.Exception.Message, "OK");
+                await HandleExceptionAsync(args.Exception);
             }
             else if(args.DataEntities != null)
             {
@@ -66,7 +66,7 @@ public partial class UniversitiesViewModel : BaseNavigationViewModel
         }
         catch(Exception exc)
         {
-            alertService.ShowMessage(exc.GetType().Name, exc.Message, "OK");
+            await HandleExceptionAsync(exc);
         }
     }
 
