@@ -10,7 +10,7 @@ public interface IUniversityRepository : IBaseRepository
 
     event UniversityQueryResultChangedEvent? UniversityResultChanged;
 
-    Task GetAsync(string universityId);
+    // Task GetAsync(string universityId);
 
     // Task<University?> GetLocalAsync(string id);
 

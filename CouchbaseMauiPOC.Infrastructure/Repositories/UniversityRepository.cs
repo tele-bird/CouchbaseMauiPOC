@@ -176,13 +176,16 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             try
             {
                 var resultsList = e.Results.AllResults();
-                Trace.WriteLine($"{nameof(UniversityRepository)}.{nameof(HandleQueryResultsChanged)} >> got {resultsList.Count} results");
+                Trace.WriteLine($"{nameof(UniversityRepository)}.{nameof(HandleQueryResultChanged)} >> got {resultsList.Count} results");
                 var universities = ExtractResults(resultsList);
                 if(universities.Count > 1)
                 {
                     throw new Exception($"Unexpected scenario: query returned {universities.Count} entities.");
                 }
-                resultChangedEventArgs.DataEntity = universities[0];
+                if(universities.Count == 1)
+                {
+                    resultChangedEventArgs.DataEntity = universities[0];
+                }
             }
             catch(Exception exc)
             {
@@ -283,7 +286,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
         ArgumentNullException.ThrowIfNull(database, nameof(database));
         ArgumentNullException.ThrowIfNull(university.Id, nameof(university.Id));
         var document = database.GetDefaultCollection().GetDocument(university.Id);
-        ArgumentNullException.ThrowIfNull(document, nameof(document));
+        if(document == null) return false;
         return database.GetDefaultCollection().Delete(document, ConcurrencyControl.LastWriteWins);
      }
 

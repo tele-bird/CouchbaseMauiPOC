@@ -41,23 +41,42 @@ internal class Program
         universityRepository.UniversityResultChanged += OnResultChanged;
         IBaseRepository[] baseRepositories = new IBaseRepository[] { userProfileRepository, universityRepository };
 
-        int? option = null;
+        int? repositorySelection = null;
         do
         {
-            option = ChooseRepository(baseRepositories);
-            if(option.HasValue)
+            repositorySelection = SelectRepository(baseRepositories);
+            if(repositorySelection.HasValue)
             {
-                string? id = null;
+                var selectedRepository = baseRepositories[repositorySelection.Value];
+
+                // select by ID:
+                string? idToSelect = null;
                 do
                 {
-                    Console.WriteLine("Enter ID: ");
-                    id = Console.ReadLine();
+                    Console.WriteLine($"Enter ID to select from the {selectedRepository.GetType().Name} repository: ");
+                    idToSelect = Console.ReadLine();
                 }
-                while (id == null);
-                await baseRepositories[option.Value].GetAsync(id);
+                while (idToSelect == null || string.IsNullOrEmpty(idToSelect));
+                await selectedRepository.GetAsync(idToSelect);
+
+                var universityRepo = selectedRepository as UniversityRepository;
+                if(universityRepo != null)
+                {
+                    // delete by ID:
+                    string? idToDelete = null;
+                    do
+                    {
+                        Console.WriteLine($"Enter ID to delete from the {selectedRepository.GetType().Name} repository: ");
+                        idToDelete = Console.ReadLine();
+                    }
+                    while(idToDelete == null || string.IsNullOrEmpty(idToDelete));
+                    var universityToDelete = new University { Id = idToDelete };
+                    var success = await universityRepo.DeleteAsync(universityToDelete);
+                    Console.WriteLine($"Deletion of {universityToDelete.Type} with ID {universityToDelete.Id} completed with status: {success.ToString().ToUpper()}.");
+                }
             }
         }
-        while (option.HasValue);
+        while (repositorySelection.HasValue);
 
         Console.WriteLine("Program terminating...");
     }
@@ -68,9 +87,9 @@ internal class Program
         Console.WriteLine($"{nameof(Program)}.{nameof(OnResultChanged)}<{typeof(TDataEntity).Name}> >> Error:{args.Exception.ToDebugString()} DataEntity:{args.DataEntity.ToDebugString<TDataEntity>()}");
     }
 
-    private static int? ChooseRepository(params IBaseRepository[] baseRepositories)
+    private static int? SelectRepository(params IBaseRepository[] baseRepositories)
     {
-        // print options:
+        // print repositories:
         StringBuilder sbOutput = new StringBuilder();
         sbOutput.AppendLine("Pick a repository:");
         for (int i = 0; i < baseRepositories.Count(); ++i)
