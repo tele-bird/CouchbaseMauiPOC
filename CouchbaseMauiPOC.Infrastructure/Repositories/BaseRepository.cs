@@ -4,11 +4,11 @@ namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
 public abstract class BaseRepository : IBaseRepository
 {
-    protected readonly Sources.DataSource DataSource;
+    protected readonly Sources.IDataSource DataSource;
 
-    public string? Path => DataSource.Database?.Path;
+    public string? Path => DataSource.Database!.Name;
 
-    protected BaseRepository(Sources.DataSource dataSource)
+    protected BaseRepository(Sources.IDataSource dataSource)
     {
         this.DataSource = dataSource;
     }

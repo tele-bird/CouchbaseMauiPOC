@@ -3,7 +3,7 @@ using Couchbase.Lite;
 using Couchbase.Lite.Query;
 using CouchbaseMauiPOC.Infrastructure.Events;
 using CouchbaseMauiPOC.Infrastructure.Models;
-using CouchbaseMauiPOC.Infrastructure.Services;
+using CouchbaseMauiPOC.Infrastructure.Sources;
 
 namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
@@ -64,8 +64,8 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
     public event UniversityQueryResultsChangedEvent? UniversityResultsChanged;
     public event UniversityQueryResultChangedEvent? UniversityResultChanged;
 
-    public UniversityRepository(Sources.UniversityDataSource universityDataSource)
-        : base(universityDataSource)
+    public UniversityRepository(CouchbaseDataSource couchbaseDataSource)
+        : base(couchbaseDataSource)
     {
     }
 
@@ -176,7 +176,7 @@ public class UniversityRepository : BaseRepository, IUniversityRepository
             try
             {
                 var resultsList = e.Results.AllResults();
-                Trace.WriteLine($"{nameof(UniversityRepository)}.{nameof(HandleQueryResultChanged)} >> got {resultsList.Count} results");
+                Trace.WriteLine($"{nameof(UniversityRepository)}.{nameof(HandleQueryResultsChanged)} >> got {resultsList.Count} results");
                 var universities = ExtractResults(resultsList);
                 if(universities.Count > 1)
                 {

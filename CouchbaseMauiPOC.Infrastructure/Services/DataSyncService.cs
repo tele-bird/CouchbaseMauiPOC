@@ -1,5 +1,6 @@
 using Couchbase.Lite;
 using Couchbase.Lite.Sync;
+using CouchbaseMauiPOC.Infrastructure.Models;
 
 namespace CouchbaseMauiPOC.Infrastructure.Services;
 
@@ -10,23 +11,18 @@ public class DataSyncService : IDisposable
     private Replicator? replicator;
     private ListenerToken? replicatorListenerToken;
 
-    public DataSyncService(
-        string username,
-        string password,
-        Uri endpointUrl,
-        ReplicatorType replicatorType = ReplicatorType.PushAndPull,
-        bool continuous = true)
+    public DataSyncService(DataSyncConfiguration dataSyncConfiguration)
     {
-        replicatorConfiguration = new ReplicatorConfiguration(new URLEndpoint(endpointUrl))
+        replicatorConfiguration = new ReplicatorConfiguration(new URLEndpoint(new Uri(dataSyncConfiguration.EndpointUrl!)))
         {
-            ReplicatorType = replicatorType,
-            Continuous = continuous,
-            Authenticator = new BasicAuthenticator(username, password),
+            ReplicatorType = dataSyncConfiguration.ReplicatorType,
+            Continuous = dataSyncConfiguration.IsContinuous,
+            Authenticator = new BasicAuthenticator(dataSyncConfiguration.Username!, dataSyncConfiguration.Password!),
             // Channels = channels
         };
     }
 
-    public Task StartAsync(Database database, CancellationToken cancellationToken)
+    public void Start(Database database, CancellationToken cancellationToken)
     {
         if(replicator == null)
         {
@@ -40,24 +36,22 @@ public class DataSyncService : IDisposable
         {
             replicator.Start();
         }
-
-        return Task.CompletedTask;
     }
 
     private void OnReplicatorStatusChanged(object? sender, ReplicatorStatusChangedEventArgs args)
     {
-        Console.WriteLine($"Activity: {args.Status.Activity}");
+        Console.WriteLine($"{GetType().Name}.{nameof(OnReplicatorStatusChanged)} - Activity: {args.Status.Activity}");
         if (args.Status.Error != null)
         {
-            Console.WriteLine($"Error :: {args.Status.Error}");
+            Console.WriteLine($"{GetType().Name}.{nameof(OnReplicatorStatusChanged)} - Error: {args.Status.Error}");
         }
         else
         {
-            Console.WriteLine($"Progress :: Total:: {args.Status.Progress.Total} Completed:: {args.Status.Progress.Completed}");
+            Console.WriteLine($"{GetType().Name}.{nameof(OnReplicatorStatusChanged)} - ProgressTotal: {args.Status.Progress.Total} ProgressCompleted: {args.Status.Progress.Completed}");
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public void Stop(CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(replicator);
 
@@ -65,8 +59,6 @@ public class DataSyncService : IDisposable
         {
             replicator.Stop();
         }
-        
-        return Task.CompletedTask;
     }
 
     public void Dispose()

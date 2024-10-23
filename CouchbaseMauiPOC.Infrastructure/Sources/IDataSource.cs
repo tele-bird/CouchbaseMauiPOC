@@ -8,6 +8,6 @@ public interface IDataSource : IDisposable
     Database? Database {get;}
 
     Task<Database> GetDatabaseAsync();
-    Task StartAsync(CancellationToken cancellationToken);
-    Task StopAsync(CancellationToken cancellationToken);
+    void Pause(CancellationToken cancellationToken);
+    void Resume(CancellationToken cancellationToken);
 }

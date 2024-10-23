@@ -39,7 +39,7 @@ internal class Program
         userProfileRepository.UserProfileResultChanged += OnResultChanged;
         var universityRepository = serviceProvider.GetRequiredService<IUniversityRepository>();
         universityRepository.UniversityResultChanged += OnResultChanged;
-        IBaseRepository[] baseRepositories = new IBaseRepository[] { userProfileRepository, universityRepository };
+        IBaseRepository[] baseRepositories = [userProfileRepository, universityRepository];
 
         int? repositorySelection = null;
         do
@@ -72,7 +72,7 @@ internal class Program
                     while(idToDelete == null || string.IsNullOrEmpty(idToDelete));
                     var universityToDelete = new University { Id = idToDelete };
                     var success = await universityRepo.DeleteAsync(universityToDelete);
-                    Console.WriteLine($"Deletion of {universityToDelete.Type} with ID {universityToDelete.Id} completed with status: {success.ToString().ToUpper()}.");
+                    Console.WriteLine($"Deletion of {universityToDelete.Type} with ID {universityToDelete.Id} completed with success: {success}.");
                 }
             }
         }

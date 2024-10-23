@@ -3,6 +3,7 @@ using Couchbase.Lite;
 using Couchbase.Lite.Query;
 using CouchbaseMauiPOC.Infrastructure.Events;
 using CouchbaseMauiPOC.Infrastructure.Models;
+using CouchbaseMauiPOC.Infrastructure.Sources;
 
 namespace CouchbaseMauiPOC.Infrastructure.Repositories;
 
@@ -29,8 +30,8 @@ public sealed class UserProfileRepository : BaseRepository, IUserProfileReposito
 
     public event UserProfileQueryResultChangedEvent? UserProfileResultChanged;
 
-    public UserProfileRepository(Sources.UserProfileDataSource userProfileDataSource)
-        : base(userProfileDataSource)
+    public UserProfileRepository(CouchbaseDataSource couchbaseDataSource)
+        : base(couchbaseDataSource)
     {
     }
 
